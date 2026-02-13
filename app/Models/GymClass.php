@@ -31,11 +31,22 @@ class GymClass extends Model
 
     public function instructor()
     {
-        return $this->belongsTo(User::class, 'instructor_id');
+        return $this->belongsTo(Instructor::class, 'instructor_id');
     }
 
     public function enrollments()
     {
         return $this->hasMany(Enrollment::class, 'class_id');
+    }
+
+    public function enrollmentClasses()
+    {
+        return $this->belongsToMany(Enrollment::class, 'enrollment_class', 'gym_class_id', 'enrollment_id');
+    }
+
+    // Alias for the many-to-many relationship (used by Filament)
+    public function classEnrollments()
+    {
+        return $this->belongsToMany(Enrollment::class, 'enrollment_class', 'gym_class_id', 'enrollment_id');
     }
 }
