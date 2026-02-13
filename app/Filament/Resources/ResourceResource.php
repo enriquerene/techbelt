@@ -19,70 +19,80 @@ class ResourceResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-cube';
 
-    protected static ?string $navigationLabel = 'Resources';
-
-    protected static ?string $navigationGroup = 'Financial';
+    protected static ?string $navigationGroup = 'Financeiro';
 
     protected static ?int $navigationSort = 30;
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Recursos';
+    }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Resource Information')
+                Forms\Components\Section::make('Informações do Recurso')
                     ->schema([
                         Forms\Components\TextInput::make('name')
                             ->required()
                             ->maxLength(255)
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->label('Nome'),
                         Forms\Components\Select::make('category')
                             ->required()
                             ->options(ResourceItem::categories())
-                            ->native(false),
+                            ->native(false)
+                            ->label('Categoria'),
                         Forms\Components\Textarea::make('description')
                             ->rows(3)
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->label('Descrição'),
                         Forms\Components\TextInput::make('quantity')
                             ->required()
                             ->numeric()
                             ->minValue(0)
-                            ->default(1),
+                            ->default(1)
+                            ->label('Quantidade'),
                         Forms\Components\TextInput::make('unit_cost')
                             ->required()
                             ->numeric()
                             ->minValue(0)
                             ->prefix('R$')
-                            ->label('Unit Cost'),
+                            ->label('Custo Unitário'),
                         Forms\Components\TextInput::make('total_cost')
                             ->numeric()
                             ->minValue(0)
                             ->prefix('R$')
-                            ->label('Total Cost')
+                            ->label('Custo Total')
                             ->disabled()
                             ->dehydrated()
-                            ->helperText('Calculated automatically: quantity × unit_cost'),
+                            ->helperText('Calculado automaticamente: quantidade × custo unitário'),
                     ])
                     ->columns(2),
                 
-                Forms\Components\Section::make('Dates & Status')
+                Forms\Components\Section::make('Datas e Status')
                     ->schema([
                         Forms\Components\DatePicker::make('purchase_date')
                             ->required()
-                            ->default(now()),
+                            ->default(now())
+                            ->label('Data de Compra'),
                         Forms\Components\DatePicker::make('next_maintenance_date')
-                            ->nullable(),
+                            ->nullable()
+                            ->label('Próxima Data de Manutenção'),
                         Forms\Components\Select::make('status')
                             ->required()
                             ->options(ResourceItem::statuses())
                             ->native(false)
-                            ->default('active'),
+                            ->default('available')
+                            ->label('Status'),
                     ])
                     ->columns(3),
                 
-                Forms\Components\Section::make('Responsibility')
+                Forms\Components\Section::make('Responsabilidade')
                     ->schema([
                         Forms\Components\Select::make('responsible_user_id')
-                            ->label('Responsible Person')
+                            ->label('Pessoa Responsável')
                             ->relationship('responsibleUser', 'name')
                             ->searchable()
                             ->preload()
@@ -97,7 +107,8 @@ class ResourceResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->label('Nome'),
                 Tables\Columns\TextColumn::make('category')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
@@ -108,44 +119,54 @@ class ResourceResource extends Resource
                         'supplies' => 'gray',
                         default => 'primary',
                     })
-                    ->formatStateUsing(fn (string $state): string => ucfirst(str_replace('_', ' ', $state))),
+                    ->formatStateUsing(fn (string $state): string => ResourceItem::categories()[$state] ?? ucfirst(str_replace('_', ' ', $state)))
+                    ->label('Categoria'),
                 Tables\Columns\TextColumn::make('quantity')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->label('Quantidade'),
                 Tables\Columns\TextColumn::make('unit_cost')
                     ->money('BRL')
-                    ->sortable(),
+                    ->sortable()
+                    ->label('Custo Unitário'),
                 Tables\Columns\TextColumn::make('total_cost')
                     ->money('BRL')
-                    ->sortable(),
+                    ->sortable()
+                    ->label('Custo Total'),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
-                        'active' => 'success',
-                        'inactive' => 'gray',
-                        'maintenance_required' => 'warning',
-                        'disposed' => 'danger',
+                        'available' => 'success',
+                        'in_use' => 'info',
+                        'maintenance' => 'warning',
+                        'depleted' => 'danger',
                         default => 'primary',
                     })
-                    ->formatStateUsing(fn (string $state): string => ucfirst(str_replace('_', ' ', $state))),
+                    ->formatStateUsing(fn (string $state): string => ResourceItem::statuses()[$state] ?? ucfirst(str_replace('_', ' ', $state)))
+                    ->label('Status'),
                 Tables\Columns\TextColumn::make('purchase_date')
                     ->date()
-                    ->sortable(),
+                    ->sortable()
+                    ->label('Data de Compra'),
                 Tables\Columns\TextColumn::make('next_maintenance_date')
                     ->date()
                     ->sortable()
-                    ->placeholder('Not scheduled'),
+                    ->placeholder('Não agendada')
+                    ->label('Próxima Manutenção'),
                 Tables\Columns\TextColumn::make('responsibleUser.name')
-                    ->label('Responsible')
+                    ->label('Responsável')
                     ->searchable()
                     ->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('category')
-                    ->options(ResourceItem::categories()),
+                    ->options(ResourceItem::categories())
+                    ->label('Categoria'),
                 Tables\Filters\SelectFilter::make('status')
-                    ->options(ResourceItem::statuses()),
+                    ->options(ResourceItem::statuses())
+                    ->label('Status'),
                 Tables\Filters\Filter::make('needs_maintenance')
+                    ->label('Precisa de Manutenção')
                     ->query(fn (Builder $query): Builder => $query->where('next_maintenance_date', '<=', now()->addDays(30))),
                 Tables\Filters\TrashedFilter::make(),
             ])

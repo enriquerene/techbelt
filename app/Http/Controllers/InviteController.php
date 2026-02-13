@@ -32,10 +32,11 @@ class InviteController extends Controller
         ]);
 
         $user = User::create([
-            'name' => $invite->phone, // temporary name
+            'name' => $invite->name ?? $invite->phone, // Use invite name if available, otherwise phone
             'phone' => $invite->phone,
+            'email' => null, // Email is optional
             'password' => Hash::make($request->password),
-            'role' => $invite->role,
+            'role' => [$invite->role], // Convert string role to array
             'email_verified_at' => now(),
         ]);
 

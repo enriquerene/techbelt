@@ -28,7 +28,7 @@ You are a Senior Laravel Architect. You focus on Modern Laravel (v11+), Livewire
 If I ask to "Fix the Docker setup", standardise on Laravel Sail. Do not create custom Dockerfiles unless explicitly asked.
 Build tests to complete cover source code features.
 Run tests to check if they pass in all suite cases.
-Implement tests before the feature itself ALWSAYS.
+Implement tests before the feature itself ALWAYS.
 Before deliver a task as "Completed" if any modification in source code check if browser behavior is working as expected.
 
 # Framework Documentations
@@ -41,3 +41,6 @@ Before deliver a task as "Completed" if any modification in source code check if
 # Business Rules
 - The displayed text should be in brazilian portugues (pt-BR)
 - Roles 'students' and 'staff' should be translated to 'alunos' and 'professores'. Translation only in screen texts which users can read, not in source code keywords!
+
+# Screen Rules
+The presentation of all data in the screen should be in brazilian porgutuese, even resource names!

@@ -17,49 +17,58 @@ class ExpenseResource extends Resource
 {
     protected static ?string $model = Expense::class;
 
-    protected static ?string $navigationLabel = 'Outcomes';
-
     protected static ?string $navigationIcon = 'heroicon-o-arrow-trending-down';
 
-    protected static ?string $navigationGroup = 'Financial';
+    protected static ?string $navigationGroup = 'Financeiro';
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Despesas';
+    }
 
     public static function form(FilamentForm $form): FilamentForm
     {
         return $form->schema([
-            Forms\Components\Section::make('Expense Details')
+            Forms\Components\Section::make('Detalhes da Despesa')
                 ->schema([
                     Forms\Components\TextInput::make('description')
                         ->required()
                         ->maxLength(255)
-                        ->columnSpanFull(),
+                        ->columnSpanFull()
+                        ->label('Descrição'),
                     Forms\Components\TextInput::make('amount')
                         ->numeric()
                         ->required()
                         ->prefix('R$')
-                        ->rules(['min:0']),
+                        ->rules(['min:0'])
+                        ->label('Valor'),
                     Forms\Components\Select::make('category')
                         ->options(Expense::categories())
                         ->required()
-                        ->default(Expense::CATEGORY_OTHER),
+                        ->default(Expense::CATEGORY_OTHER)
+                        ->label('Categoria'),
                     Forms\Components\DatePicker::make('date')
                         ->required()
-                        ->default(now()),
+                        ->default(now())
+                        ->label('Data'),
                     Forms\Components\Select::make('payment_method')
                         ->options(Expense::paymentMethods())
                         ->required()
-                        ->default(Expense::PAYMENT_METHOD_CASH),
+                        ->default(Expense::PAYMENT_METHOD_CASH)
+                        ->label('Método de Pagamento'),
                 ])->columns(2),
 
-            Forms\Components\Section::make('Additional Information')
+            Forms\Components\Section::make('Informações Adicionais')
                 ->schema([
                     Forms\Components\Select::make('staff_id')
-                        ->label('Staff Member (if staff payment)')
+                        ->label('Membro da Equipe (se pagamento de funcionário)')
                         ->options(User::whereIn('role', ['staff', 'admin'])->pluck('name', 'id'))
                         ->searchable()
                         ->nullable(),
                     Forms\Components\Textarea::make('notes')
                         ->rows(3)
-                        ->columnSpanFull(),
+                        ->columnSpanFull()
+                        ->label('Observações'),
                 ]),
         ]);
     }
@@ -71,10 +80,12 @@ class ExpenseResource extends Resource
                 Tables\Columns\TextColumn::make('description')
                     ->searchable()
                     ->sortable()
-                    ->limit(50),
+                    ->limit(50)
+                    ->label('Descrição'),
                 Tables\Columns\TextColumn::make('amount')
                     ->money('BRL')
-                    ->sortable(),
+                    ->sortable()
+                    ->label('Valor'),
                 Tables\Columns\BadgeColumn::make('category')
                     ->formatStateUsing(fn (string $state): string => Expense::categories()[$state] ?? $state)
                     ->colors([
@@ -83,23 +94,34 @@ class ExpenseResource extends Resource
                         'success' => Expense::CATEGORY_MARKETING,
                         'gray' => Expense::CATEGORY_OTHER,
                     ])
-                    ->sortable(),
+                    ->sortable()
+                    ->label('Categoria'),
                 Tables\Columns\TextColumn::make('date')
                     ->date()
-                    ->sortable(),
+                    ->sortable()
+                    ->label('Data'),
                 Tables\Columns\TextColumn::make('payment_method')
-                    ->formatStateUsing(fn (string $state): string => ucfirst(str_replace('_', ' ', $state)))
-                    ->sortable(),
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'cash' => 'Dinheiro',
+                        'bank_transfer' => 'Transferência Bancária',
+                        'credit_card' => 'Cartão de Crédito',
+                        'pix' => 'PIX',
+                        default => ucfirst(str_replace('_', ' ', $state)),
+                    })
+                    ->sortable()
+                    ->label('Método de Pagamento'),
                 Tables\Columns\TextColumn::make('staff.name')
-                    ->label('Staff Member')
+                    ->label('Membro da Equipe')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('category')
-                    ->options(Expense::categories()),
+                    ->options(Expense::categories())
+                    ->label('Categoria'),
                 Tables\Filters\SelectFilter::make('payment_method')
-                    ->options(Expense::paymentMethods()),
+                    ->options(Expense::paymentMethods())
+                    ->label('Método de Pagamento'),
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([

@@ -1,6 +1,6 @@
 <x-layouts::auth>
     <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Log in to your account')" :description="__('Enter your email and password below to log in')" />
+        <x-auth-header :title="__('Log in to your account')" :description="__('Enter your phone number and password below to log in')" />
 
         <!-- Session Status -->
         <x-auth-session-status class="text-center" :status="session('status')" />
@@ -8,17 +8,50 @@
         <form method="POST" action="{{ route('login.store') }}" class="flex flex-col gap-6">
             @csrf
 
-            <!-- Email Address -->
-            <flux:input
-                name="email"
-                :label="__('Email address')"
-                :value="old('email')"
-                type="email"
-                required
-                autofocus
-                autocomplete="email"
-                placeholder="email@example.com"
-            />
+            <!-- Phone Number -->
+            <div x-data="{
+                phoneDisplay: '{{ old('phone') ? preg_replace('/^\+55(\d{2})(\d{5})(\d{4})$/', '($1) $2-$3', old('phone')) : '' }}',
+                actualPhone: '{{ old('phone', '') }}',
+                formatPhone() {
+                    // Remove all non-digits
+                    let digits = this.phoneDisplay.replace(/\D/g, '');
+                    
+                    // Format as (XX) XXXXX-XXXX
+                    if (digits.length >= 2) {
+                        let formatted = '(' + digits.substring(0, 2);
+                        if (digits.length > 2) {
+                            formatted += ') ' + digits.substring(2, 7);
+                            if (digits.length > 7) {
+                                formatted += '-' + digits.substring(7, 11);
+                            }
+                        }
+                        this.phoneDisplay = formatted;
+                    }
+                    
+                    // Update actual phone value (digits only with +55)
+                    let fullDigits = digits;
+                    if (fullDigits.length >= 10) {
+                        this.actualPhone = '+55' + fullDigits;
+                    } else {
+                        this.actualPhone = '';
+                    }
+                }
+            }" x-init="formatPhone()">
+                <!-- Hidden input for the actual phone value that will be submitted -->
+                <input type="hidden" name="phone" x-model="actualPhone" />
+                
+                <!-- Display input for formatting only -->
+                <flux:input
+                    :label="__('Phone number')"
+                    x-model="phoneDisplay"
+                    x-on:input="formatPhone()"
+                    type="tel"
+                    required
+                    autofocus
+                    autocomplete="tel"
+                    placeholder="(11) 99999-9999"
+                />
+            </div>
 
             <!-- Password -->
             <div class="relative">

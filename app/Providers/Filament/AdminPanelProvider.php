@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Http\Middleware\CheckPanelRole;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -29,7 +30,16 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->colors([
                 'primary' => Color::Amber,
+                'gray' => Color::Zinc,
+                'danger' => Color::Red,
+                'success' => Color::Green,
+                'warning' => Color::Yellow,
+                'info' => Color::Blue,
             ])
+            ->font('Inter')
+            ->brandName('Scotelaro Admin')
+            ->brandLogo(asset('logo.png'))
+            ->favicon(asset('favicon.png'))
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
@@ -39,6 +49,17 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 Widgets\AccountWidget::class,
                 Widgets\FilamentInfoWidget::class,
+            ])
+            ->resources([
+                \App\Filament\Resources\StudentResource::class,
+                \App\Filament\Resources\StaffResource::class,
+                \App\Filament\Resources\EnrollmentResource::class,
+                \App\Filament\Resources\ModalityResource::class,
+                \App\Filament\Resources\GymClassResource::class,
+                \App\Filament\Resources\PricingTierResource::class,
+                \App\Filament\Resources\InviteResource::class,
+                \App\Filament\Resources\ExpenseResource::class,
+                \App\Filament\Resources\ResourceResource::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -50,9 +71,17 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                CheckPanelRole::class . ':admin',
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            ->authGuard('web')
+            ->spa()
+            ->sidebarCollapsibleOnDesktop()
+            ->topNavigation(false)
+            ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
+            ->breadcrumbs(false)
+            ->darkMode(true); // Force dark theme
     }
 }

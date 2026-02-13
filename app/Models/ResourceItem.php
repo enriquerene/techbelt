@@ -47,12 +47,12 @@ class ResourceItem extends Model
     public static function categories(): array
     {
         return [
-            self::CATEGORY_FIRST_AID => 'First Aid Kit',
-            self::CATEGORY_MAINTENANCE => 'Maintenance',
+            self::CATEGORY_FIRST_AID => 'Kit de Primeiros Socorros',
+            self::CATEGORY_MAINTENANCE => 'Manutenção',
             self::CATEGORY_MARKETING => 'Marketing',
-            self::CATEGORY_EQUIPMENT => 'Equipment',
-            self::CATEGORY_SUPPLIES => 'Supplies',
-            self::CATEGORY_OTHER => 'Other',
+            self::CATEGORY_EQUIPMENT => 'Equipamento',
+            self::CATEGORY_SUPPLIES => 'Suprimentos',
+            self::CATEGORY_OTHER => 'Outro',
         ];
     }
 
@@ -65,10 +65,10 @@ class ResourceItem extends Model
     public static function statuses(): array
     {
         return [
-            self::STATUS_AVAILABLE => 'Available',
-            self::STATUS_IN_USE => 'In Use',
-            self::STATUS_MAINTENANCE => 'Maintenance',
-            self::STATUS_DEPLETED => 'Depleted',
+            self::STATUS_AVAILABLE => 'Disponível',
+            self::STATUS_IN_USE => 'Em Uso',
+            self::STATUS_MAINTENANCE => 'Manutenção',
+            self::STATUS_DEPLETED => 'Esgotado',
         ];
     }
 

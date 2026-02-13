@@ -9,31 +9,24 @@ Route::get('/', function () {
 Route::get('dashboard', function () {
     $user = auth()->user();
     
-    if ($user->isAdmin() || $user->isStaff()) {
-        // Try to redirect to admin panel, fallback to welcome page if not available
-        try {
-            return redirect('/admin');
-        } catch (\Exception $e) {
-            return redirect('/')->with('info', 'Admin panel not configured. Redirected to home.');
-        }
+    if ($user->isAdmin()) {
+        // Admin users go to admin panel (dark theme)
+        return redirect('/admin');
     }
     
-    // For students, check subscription and redirect accordingly
+    if ($user->isStaff()) {
+        // Staff users go to staff panel (light theme)
+        return redirect('/staff');
+    }
+    
+    // For students, always redirect to onboarding
+    // The onboarding wizard will check for existing subscription and redirect to app if needed
     if ($user->isStudent()) {
-        $hasActiveSubscription = $user->subscriptions()
-            ->where('status', 'active')
-            ->where('ends_at', '>', now())
-            ->exists();
-            
-        if (!$hasActiveSubscription) {
-            return redirect()->route('onboarding');
-        }
-        
-        return redirect()->route('app.home');
+        return redirect()->route('onboarding');
     }
     
-    // Default fallback
-    return redirect()->route('app.home');
+    // Default fallback (should not reach here for authenticated users)
+    return redirect()->route('home');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 // Student App Routes (/app)

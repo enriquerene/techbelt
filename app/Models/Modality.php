@@ -14,8 +14,6 @@ class Modality extends Model
         'name',
         'slug',
         'description',
-        'color',
-        'icon',
         'image',
         'is_active',
         'order',
@@ -29,6 +27,29 @@ class Modality extends Model
     public function classes()
     {
         return $this->hasMany(GymClass::class);
+    }
+
+    public function enrollments()
+    {
+        return $this->hasManyThrough(
+            Enrollment::class,
+            GymClass::class,
+            'modality_id', // Foreign key on GymClass table
+            'class_id',    // Foreign key on Enrollment table
+            'id',          // Local key on Modality table
+            'id'           // Local key on GymClass table
+        );
+    }
+
+    public function getStudentsCountAttribute()
+    {
+        if (!array_key_exists('students_count', $this->attributes)) {
+            // If not eager-loaded, compute via subquery
+            $this->attributes['students_count'] = $this->enrollments()
+                ->distinct('user_id')
+                ->count('user_id');
+        }
+        return $this->attributes['students_count'];
     }
 
     protected static function boot()

@@ -14,11 +14,13 @@ class FinancialDashboard extends Page implements HasTable
 {
     use Tables\Concerns\InteractsWithTable;
 
+    protected static ?string $title = 'Pagamentos';
+
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
 
-    protected static ?string $navigationLabel = 'Incoming Payments';
+    protected static ?string $navigationLabel = 'Pagamentos';
 
-    protected static ?string $navigationGroup = 'Financial';
+    protected static ?string $navigationGroup = 'Financeiro';
 
     protected static string $view = 'filament.pages.financial-dashboard';
 
@@ -81,8 +83,6 @@ class FinancialDashboard extends Page implements HasTable
 
     protected function getHeaderWidgets(): array
     {
-        return [
-            FinancialDashboard\Widgets\FinancialStats::class,
-        ];
+        return [];
     }
 }

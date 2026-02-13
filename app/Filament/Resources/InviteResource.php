@@ -14,69 +14,120 @@ class InviteResource extends Resource
 {
     protected static ?string $model = Invite::class;
 
-    protected static ?string $navigationLabel = 'Invites';
-
     protected static ?string $navigationIcon = 'heroicon-o-paper-airplane';
 
-    protected static ?string $navigationGroup = 'Users';
+    protected static ?string $navigationGroup = 'Usuários';
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Convites';
+    }
 
     public static function form(FilamentForm $form): FilamentForm
     {
         return $form->schema([
-            Forms\Components\Section::make('Invite Details')
+            Forms\Components\Section::make('Detalhes do Convite')
                 ->schema([
+                    Forms\Components\TextInput::make('name')
+                        ->label('Nome do Destinatário')
+                        ->required()
+                        ->maxLength(255)
+                        ->helperText('Nome da pessoa que está sendo convidada'),
                     Forms\Components\TextInput::make('phone')
                         ->required()
                         ->maxLength(40)
                         ->tel()
-                        ->helperText('Phone number to send the invite to'),
+                        ->mask('(99) 99999-9999')
+                        ->placeholder('(21) 96447-0631')
+                        ->helperText('Formato brasileiro: (xx) 9xxxx-xxxx'),
                     Forms\Components\Select::make('role')
-                        ->label('Invite for')
+                        ->label('Convite para')
                         ->options([
-                            'student' => 'Student',
-                            'staff' => 'Staff/Instructor',
-                            'admin' => 'Administrator',
+                            'student' => 'Aluno',
+                            'staff' => 'Professor/Instrutor',
+                            'admin' => 'Administrador',
                         ])
                         ->default('student')
                         ->required()
-                        ->helperText('Select the role for the invited user'),
-                    Forms\Components\DateTimePicker::make('expires_at')
-                        ->label('Expiration Date')
-                        ->helperText('Leave empty for no expiration'),
+                        ->helperText('Selecione o Perfil do usuário convidado'),
+                    Forms\Components\DatePicker::make('expires_at')
+                        ->label('Data de Expiração')
+                        ->helperText('Deixe vazio para não expirar'),
                 ])->columns(2),
         ]);
     }
 
     public static function table(FilamentTable $table): FilamentTable
     {
-        return $table->columns([
-            Tables\Columns\TextColumn::make('id')
-                ->sortable(),
-            Tables\Columns\TextColumn::make('phone')
-                ->searchable()
-                ->sortable(),
-            Tables\Columns\BadgeColumn::make('role')
-                ->formatStateUsing(fn (string $state): string => ucfirst($state))
-                ->colors([
-                    'success' => 'student',
-                    'warning' => 'staff',
-                    'danger' => 'admin',
-                ])
-                ->sortable(),
-            Tables\Columns\TextColumn::make('expires_at')
-                ->dateTime()
-                ->sortable()
-                ->placeholder('Never'),
-            Tables\Columns\TextColumn::make('created_at')
-                ->dateTime()
-                ->sortable()
-                ->toggleable(isToggledHiddenByDefault: true),
-        ])->actions([
-            Tables\Actions\EditAction::make(),
-            Tables\Actions\DeleteAction::make(),
-        ])->bulkActions([
-            Tables\Actions\DeleteBulkAction::make(),
-        ]);
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('name')
+                    ->searchable()
+                    ->sortable()
+                    ->label('Nome')
+                    ->placeholder('Sem nome'),
+                Tables\Columns\TextColumn::make('phone')
+                    ->searchable()
+                    ->sortable()
+                    ->label('Telefone'),
+                Tables\Columns\BadgeColumn::make('role')
+                    ->formatStateUsing(fn (string $state): string => match($state) {
+                        'student' => 'Aluno',
+                        'staff' => 'Professor',
+                        'admin' => 'Administrador',
+                        default => ucfirst($state),
+                    })
+                    ->colors([
+                        'success' => 'student',
+                        'warning' => 'staff',
+                        'danger' => 'admin',
+                    ])
+                    ->sortable()
+                    ->label('Perfil'),
+                Tables\Columns\TextColumn::make('expires_at')
+                    ->date(fn ($state) => $state ? $state->format('d/m/Y') : 'Nunca')
+                    ->sortable()
+                    ->label('Expira em')
+                    ->placeholder('Nunca'),
+                Tables\Columns\TextColumn::make('invite_link')
+                    ->label('Link do Convite')
+                    ->getStateUsing(function ($record) {
+                        $token = $record->token;
+                        if (strlen($token) <= 8) {
+                            return $token;
+                        }
+                        return substr($token, 0, 8) . '...';
+                    })
+                    ->copyable()
+                    ->copyableState(fn ($record) => route('invite.show', $record->token))
+                    ->color(function ($record) {
+                        if ($record->expires_at && $record->expires_at->isPast()) {
+                            return 'danger';
+                        }
+                        return 'info';
+                    })
+                    ->placeholder('N/A')
+                    ->tooltip('Clique para copiar o link completo'),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->label('Criado em')
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make()
+                    ->label('Editar'),
+                Tables\Actions\DeleteAction::make()
+                    ->label('Excluir'),
+            ])
+            ->bulkActions([
+                Tables\Actions\DeleteBulkAction::make()
+                    ->label('Excluir selecionados'),
+            ])
+            ->headerActions([
+                Tables\Actions\CreateAction::make()
+                    ->label('Novo Convite'),
+            ]);
     }
 
     public static function getPages(): array
@@ -87,4 +138,5 @@ class InviteResource extends Resource
             'edit' => Pages\EditInvite::route('/{record}/edit'),
         ];
     }
+
 }

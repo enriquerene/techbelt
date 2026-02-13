@@ -15,6 +15,8 @@ class Profile extends Component
 
     public string $name = '';
 
+    public string $phone = '';
+
     public string $email = '';
 
     /**
@@ -22,8 +24,10 @@ class Profile extends Component
      */
     public function mount(): void
     {
-        $this->name = Auth::user()->name;
-        $this->email = Auth::user()->email;
+        $user = Auth::user();
+        $this->name = $user->name;
+        $this->phone = $user->phone ?? '';
+        $this->email = $user->email ?? '';
     }
 
     /**

@@ -29,6 +29,7 @@ A comprehensive martial arts academy management system built with modern Laravel
 | **Commercial Definition** | ✅ Complete | Pricing tiers with billing periods, frequency types, modality scopes |
 | **Financial Guardrails** | ✅ Complete | Strict "no-edit" strategy for enrollments with Infolists |
 | **Financial Management Section** | ✅ Complete | Incoming payments dashboard, expenses tracking, and resources inventory |
+| **Enrollment System Refactoring** | ✅ Complete | Multiple class enrollment, payment separation, price override functionality |
 | **PWA Setup** | ⚠️ Partial | Basic setup, needs service worker optimization |
 | **Payment Integration** | ✅ Mock Complete | Full payment flow with mock processing for testing |
 | **Production Deployment** | ✅ Ready | Configuration optimized for production |
@@ -50,6 +51,11 @@ The system implements a high-integrity admin experience with strict financial co
   - **Incoming Payments Dashboard** - View all student payments, subscriptions, and billing status
   - **Outcomes/Expenses Tracking** - Manage staff payments, maintenance costs, marketing expenses, and other operational costs
   - **Resources Inventory** - Track academy resources like first aid kits, equipment, marketing materials with maintenance scheduling
+- **Enhanced Enrollment System**:
+  - **Multiple Class Enrollment**: Students can enroll in multiple classes based on plan limits
+  - **Payment Separation**: Payment information stored separately in dedicated payments table
+  - **Price Override**: Admins can set custom prices while defaulting to plan pricing
+  - **Class Limit Validation**: Automatic validation based on plan's class count
 
 ### 📱 Student PWA (`/app`)
 - **Mobile-First Interface** with responsive design
@@ -60,11 +66,36 @@ The system implements a high-integrity admin experience with strict financial co
 - **Profile Management** - Update personal information
 
 ### 🔐 Authentication & Security
-- **Dual Login** with phone number or email
+- **Phone-Based Login** - Phone number is the primary identifier (required)
+- **Optional Email** - Email is optional throughout the system
 - **Two-Factor Authentication** (2FA) support
 - **Invite-Only Registration** for controlled access
-- **Role-Based Permissions** (Admin, Staff, Student)
+- **Role-Based Permissions** (Admin, Staff, Student) with multi-role support
 - **Password Validation** with Laravel Fortify
+- **Phone Mask** - Automatic formatting for Brazilian phone numbers (+55 (XX) XXXXX-XXXX)
+
+#### Panel-Based Role Enforcement
+The system implements strict role-based access control through separate Filament panels:
+
+- **Admin Panel** (`/admin`) - Dark theme, accessible only to users with `admin` role
+  - Uses `CheckPanelRole:admin` middleware
+  - Contains all 9 resources (Students, Staff, Enrollments, Modalities, Gym Classes, Pricing Tiers, Invites, Expenses, Resources)
+  - Full administrative privileges
+
+- **Staff Panel** (`/staff`) - Light theme, accessible only to users with `staff` role
+  - Uses `CheckPanelRole:staff` middleware
+  - Limited to 4 resources (Students, Enrollments, Gym Classes, Modalities)
+  - Staff can only view students enrolled in their classes (scoped access)
+
+- **Student PWA** (`/app`) - Accessible to users with `student` role
+  - Redirects students away from admin/staff panels
+  - Provides onboarding wizard and class management
+
+**Security Implementation:**
+- Custom middleware `app/Http/Middleware/CheckPanelRole.php` validates user role against panel requirements
+- Unauthorized access attempts redirect users to their appropriate panel
+- Separate visual themes (dark/light) provide immediate visual feedback of current role context
+- Database-level policies enforce data access restrictions
 
 ### 📊 Business Logic
 - **Flexible Pricing** - Tier-based pricing with billing periods (monthly, quarterly, annual)
@@ -76,6 +107,11 @@ The system implements a high-integrity admin experience with strict financial co
 - **Graduation System** - Track belt/rank progression
 - **Capacity Management** - Class enrollment limits
 - **Visual Identity** - Modalities have colors and icons for visual distinctiveness
+- **Enhanced Enrollment Logic**:
+  - **Default Plan Pricing**: Enrollment uses pricing tier price as default
+  - **Admin Price Override**: Custom prices can be set with `is_custom_price` flag
+  - **Multiple Classes**: Students can enroll in multiple classes (many-to-many relationship)
+  - **Payment Tracking**: Separate payment records with status tracking (pending, completed, failed, refunded)
 
 ## 🚀 Quick Start
 
@@ -135,17 +171,19 @@ After running the database seeder, the following test users are created for deve
 
 ### Primary Test Accounts
 
-| User | Email | Password | Role | Phone | Purpose |
-|------|-------|----------|------|-------|---------|
-| João Silva | `joao.silva@example.com` | `password` | Student | `+55 (11) 98765-4321` | **Test onboarding flow** - No subscription, will be redirected to onboarding |
-| Maria Santos | `maria.santos@example.com` | `password` | Student | `+55 (21) 99876-5432` | **Test app access** - Has active subscription, can access app directly |
-| Admin User | `admin@scotelaro.com` | `password` | Admin | `+55 (31) 91234-5678` | **Create resources manually** - Full admin access |
-| Carlos Oliveira | `carlos.oliveira@example.com` | `password` | Staff | `+55 (41) 92345-6789` | **Test staff role** - Limited access |
+**Note:** Phone number is now the primary identifier for authentication. Email is optional and shown for reference only.
+
+| User | Phone (Primary Login) | Password | Role | Email (Optional) | Purpose |
+|------|----------------------|----------|------|------------------|---------|
+| João Silva | `+55 (11) 98765-4321` | `password` | Student | `joao.silva@example.com` | **Test onboarding flow** - No subscription, will be redirected to onboarding |
+| Maria Santos | `+55 (21) 99876-5432` | `password` | Student | `maria.santos@example.com` | **Test app access** - Has active subscription, can access app directly |
+| Admin User | `+55 (31) 91234-5678` | `password` | Admin | `admin@scotelaro.com` | **Create resources manually** - Full admin access |
+| Carlos Oliveira | `+55 (41) 92345-6789` | `password` | Staff | `carlos.oliveira@example.com` | **Test staff role** - Limited access |
 
 ### Additional Users
 - 3 random student users with Brazilian phone numbers
 - All users have password: `password`
-- All emails are verified
+- Email verification is disabled (email is optional)
 
 ## 🔄 Onboarding Flow (Automatic Redirection)
 
@@ -180,6 +218,29 @@ The system now implements automatic onboarding redirection for students without 
 - **Authentication**: Laravel Fortify
 - **Development**: Laravel Sail (Docker)
 - **Asset Bundling**: Vite
+- **Localization**: Full Brazilian Portuguese (pt_BR) translation support
+
+### Localization & Internationalization
+The application is fully localized for Brazilian Portuguese (pt_BR) with the following features:
+
+#### Translation Files
+- **`lang/pt_BR.json`** - General application translations (navigation labels, buttons, common terms)
+- **`lang/pt_BR/auth.php`** - Authentication messages
+- **`lang/pt_BR/validation.php`** - Validation rules and messages
+- **`lang/pt_BR/passwords.php`** - Password reset messages
+- **`lang/pt_BR/pagination.php`** - Pagination translations
+
+#### Key Translations
+- **Role-based terminology**: "Students" → "Alunos", "Staff" → "Professores"
+- **Financial terms**: "Incoming Payments" → "Pagamentos Recebidos", "Outcomes" → "Saídas"
+- **Navigation labels**: All Filament resources use `getNavigationLabel()` method with `__()` helper
+- **Business context**: Martial arts academy specific terms properly translated
+
+#### Implementation Details
+- **Locale Configuration**: `config/app.php` set to `'locale' => 'pt_BR'`
+- **Filament Integration**: Navigation labels automatically translated via Laravel's translation system
+- **Best Practices**: All user-facing text uses translation keys, no hardcoded strings in resources
+- **Extensibility**: Easy to add new languages by creating additional locale directories
 
 ### Directory Structure
 ```
@@ -214,11 +275,22 @@ app/
 - **Commercial Resources**: `app/Filament/Resources/PricingTierResource.php` - Billing periods, frequency types, modality scopes
 - **Financial Guardrails**: `app/Filament/Resources/EnrollmentResource.php` - Read-only views with custom actions (cancel, renew, change payment)
 
-#### 4. Database Schema Enhancements
+#### 4. Enhanced Enrollment System
+- **Payment Model**: `app/Models/Payment.php` - Dedicated payment tracking with status management
+- **Many-to-Many Relationship**: `enrollment_class` pivot table for multiple class enrollment
+- **Price Calculation**: Automatic default to plan pricing with admin override capability
+- **Form Validation**: Class count validation based on plan limits
+- **Payment History**: Complete payment tracking within enrollment infolist
+
+#### 5. Database Schema Enhancements
 - **Visual Fields Migration**: `database/migrations/2026_02_07_195638_add_visual_fields_to_modalities_table.php`
 - **Commercial Fields Migration**: `database/migrations/2026_02_07_195820_add_commercial_fields_to_pricing_tiers_table.php`
 - **Pivot Table Migration**: `database/migrations/2026_02_07_195902_create_pricing_tier_modality_table.php`
 - **Financial Fields Migration**: `database/migrations/2026_02_07_200138_add_financial_fields_to_enrollments_table.php`
+- **Payment System Migration**: `database/migrations/2026_02_12_145455_create_payments_table.php`
+- **Multiple Class Enrollment**: `database/migrations/2026_02_12_145500_create_enrollment_class_table.php`
+- **Enrollment Refactoring**: `database/migrations/2026_02_12_145506_modify_enrollments_table_for_new_requirements.php`
+- **Foreign Key Fix**: `database/migrations/2026_02_12_170656_rename_class_id_to_gym_class_id_in_enrollment_class_table.php`
 
 ## 📖 Usage Guide
 
@@ -227,7 +299,11 @@ app/
 2. Navigate to **Invites** to create new user invitations
 3. Use **Modalities** with visual distinctiveness (colors, icons, reorderable tables)
 4. Configure **Pricing Tiers** with commercial definitions (billing periods, frequency types, modality scopes)
-5. Manage **Enrollments** with strict financial guardrails (read-only views, custom actions only)
+5. Manage **Enrollments** with enhanced features:
+   - Create enrollments with multiple class selection
+   - Set custom prices when needed (defaults to plan pricing)
+   - View payment history for each enrollment
+   - Register new payments directly from enrollment actions
 6. Monitor **Students** with role-based scopes and filtering
 7. Use **Archive** actions for pricing tiers with active subscriptions
 8. Enforce **Financial Contract Immutability** - enrollments cannot be edited once created
@@ -328,6 +404,13 @@ Or for specific test suites:
 ./vendor/bin/sail artisan test --testsuite=Unit
 ```
 
+### Enhanced Enrollment Tests
+The test suite includes comprehensive tests for the enhanced enrollment system:
+- Price calculation (default vs custom)
+- Multiple class enrollment validation
+- Payment creation and tracking
+- Class limit enforcement based on plan
+
 ## 🔧 Development
 
 ### Common Sail Commands
@@ -411,4 +494,4 @@ For technical support or questions:
 
 **Built with ❤️ using the TALL Stack (Tailwind, Alpine, Laravel, Livewire) + Filament**
 
-*Last Updated: February 7, 2026*
+*Last Updated: February 13, 2026*
