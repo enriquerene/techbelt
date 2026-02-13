@@ -23,10 +23,10 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
-        // Generate Brazilian phone number format: +55 (11) 9XXXX-XXXX
+        // Generate Brazilian phone number as digits only: +55119XXXX-XXXX
         $areaCode = fake()->randomElement(['11', '21', '31', '41', '51', '61', '71', '81', '91']);
-        $phoneNumber = '9' . fake()->numerify('####-####');
-        $fullPhone = "+55 ({$areaCode}) {$phoneNumber}";
+        $phoneNumber = '9' . fake()->numerify('########');
+        $fullPhone = "+55{$areaCode}{$phoneNumber}";
         
         return [
             'name' => fake()->name(),
@@ -34,7 +34,7 @@ class UserFactory extends Factory
             'phone' => $fullPhone,
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
-            'role' => \App\Models\User::ROLE_STUDENT,
+            'role' => [\App\Models\User::ROLE_STUDENT],
             'remember_token' => Str::random(10),
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
@@ -70,7 +70,7 @@ class UserFactory extends Factory
     public function staff(): static
     {
         return $this->state(fn (array $attributes) => [
-            'role' => \App\Models\User::ROLE_STAFF,
+            'role' => [\App\Models\User::ROLE_STAFF],
         ]);
     }
 
@@ -80,7 +80,7 @@ class UserFactory extends Factory
     public function admin(): static
     {
         return $this->state(fn (array $attributes) => [
-            'role' => \App\Models\User::ROLE_ADMIN,
+            'role' => [\App\Models\User::ROLE_ADMIN],
         ]);
     }
 }
