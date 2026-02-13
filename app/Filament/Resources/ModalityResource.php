@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ModalityResource\Pages;
 use App\Models\Modality;
+use App\Models\Enrollment;
 use Filament\Forms;
 use Filament\Tables;
 use Filament\Resources\Resource;
@@ -16,19 +17,25 @@ class ModalityResource extends Resource
 {
     protected static ?string $model = Modality::class;
 
-    protected static ?string $navigationLabel = 'Modalities';
-
     protected static ?string $navigationIcon = 'heroicon-o-tag';
+
+    public static ?string $title = 'Modalidade';
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Modalidades';
+    }
 
     public static function form(FilamentForm $form): FilamentForm
     {
         return $form->schema([
-            Forms\Components\Section::make('Basic Information')
+            Forms\Components\Section::make('Informações Básicas')
                 ->schema([
                     Forms\Components\TextInput::make('name')
                         ->required()
                         ->maxLength(255)
                         ->live(onBlur: true)
+                        ->label('Nome')
                         ->afterStateUpdated(function ($state, $set) {
                             $set('slug', \Illuminate\Support\Str::slug($state));
                         }),
@@ -36,52 +43,28 @@ class ModalityResource extends Resource
                         ->required()
                         ->maxLength(255)
                         ->unique(ignoreRecord: true)
-                        ->helperText('Auto-generated from name, but can be customized'),
+                        ->label('Slug')
+                        ->helperText('Gerado automaticamente a partir do nome, mas pode ser personalizado'),
                     Forms\Components\Textarea::make('description')
                         ->rows(3)
-                        ->columnSpanFull(),
-                ])->columns(2),
-
-            Forms\Components\Section::make('Visual Identity')
-                ->schema([
-                    Forms\Components\ColorPicker::make('color')
-                        ->default('#3b82f6')
-                        ->required(),
-                    Forms\Components\Select::make('icon')
-                        ->options([
-                            'heroicon-o-academic-cap' => 'Academic Cap',
-                            'heroicon-o-beaker' => 'Beaker',
-                            'heroicon-o-bolt' => 'Bolt',
-                            'heroicon-o-book-open' => 'Book Open',
-                            'heroicon-o-cube' => 'Cube',
-                            'heroicon-o-fire' => 'Fire',
-                            'heroicon-o-globe-alt' => 'Globe',
-                            'heroicon-o-heart' => 'Heart',
-                            'heroicon-o-lightning-bolt' => 'Lightning Bolt',
-                            'heroicon-o-musical-note' => 'Musical Note',
-                            'heroicon-o-puzzle-piece' => 'Puzzle Piece',
-                            'heroicon-o-shield-check' => 'Shield Check',
-                            'heroicon-o-star' => 'Star',
-                            'heroicon-o-trophy' => 'Trophy',
-                            'heroicon-o-user-group' => 'User Group',
-                        ])
-                        ->searchable()
-                        ->required(),
+                        ->columnSpanFull()
+                        ->label('Descrição'),
                     Forms\Components\FileUpload::make('image')
-                        ->label('Modality Image')
+                        ->label('Imagem da Modalidade')
                         ->image()
                         ->directory('modalities')
                         ->maxSize(2048)
                         ->nullable()
-                        ->helperText('Upload an image for this modality (max 2MB)'),
+                        ->helperText('Imagem opcional para esta modalidade (máx. 2MB)'),
                     Forms\Components\Toggle::make('is_active')
-                        ->label('Active')
+                        ->label('Ativa')
                         ->default(true)
                         ->required(),
                     Forms\Components\TextInput::make('order')
                         ->numeric()
                         ->default(0)
-                        ->required(),
+                        ->required()
+                        ->label('Ordem'),
                 ])->columns(2),
         ]);
     }
@@ -92,39 +75,39 @@ class ModalityResource extends Resource
             ->reorderable('order')
             ->defaultSort('order')
             ->columns([
-                Tables\Columns\ColorColumn::make('color')
-                    ->label('')
-                    ->width(20),
                 Tables\Columns\ImageColumn::make('image')
-                    ->label('Image')
+                    ->label('Imagem')
                     ->circular()
-                    ->defaultImageUrl(fn ($record) => $record->icon ? null : 'https://ui-avatars.com/api/?name=' . urlencode($record->name) . '&color=FFFFFF&background=3b82f6')
+                    ->defaultImageUrl(fn ($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name) . '&color=FFFFFF&background=3b82f6')
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
-                    ->sortable(),
-                Tables\Columns\IconColumn::make('is_active')
-                    ->boolean()
-                    ->label('Status')
-                    ->sortable(),
+                    ->sortable()
+                    ->label('Nome'),
                 Tables\Columns\TextColumn::make('classes_count')
                     ->counts('classes')
-                    ->label('Classes')
+                    ->label('Turmas')
                     ->sortable(),
+                Tables\Columns\TextColumn::make('students_count')
+                    ->label('Alunos')
+                    ->sortable()
+                    ->numeric(),
                 Tables\Columns\TextColumn::make('order')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->label('Ordem'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->label('Criado em'),
             ])
             ->filters([
                 Tables\Filters\TernaryFilter::make('is_active')
-                    ->label('Active Status')
-                    ->trueLabel('Active only')
-                    ->falseLabel('Inactive only'),
-                    // ->nullableLabel('All'),
+                    ->label('Status Ativo')
+                    ->trueLabel('Somente ativas')
+                    ->falseLabel('Somente inativas'),
+                    // ->nullableLabel('Todas'),
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
@@ -140,6 +123,9 @@ class ModalityResource extends Resource
                     Tables\Actions\ForceDeleteBulkAction::make(),
                     Tables\Actions\RestoreBulkAction::make(),
                 ]),
+            ])
+            ->headerActions([
+                Tables\Actions\CreateAction::make(),
             ]);
     }
 
@@ -148,6 +134,13 @@ class ModalityResource extends Resource
         return parent::getEloquentQuery()
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
+            ])
+            ->withCount(['classes'])
+            ->addSelect([
+                'students_count' => Enrollment::selectRaw('COUNT(DISTINCT user_id)')
+                    ->join('classes', 'enrollments.class_id', '=', 'classes.id')
+                    ->whereColumn('classes.modality_id', 'modalities.id')
+                    ->limit(1)
             ]);
     }
 

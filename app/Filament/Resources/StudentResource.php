@@ -3,7 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\StudentResource\Pages;
-use App\Models\User;
+use App\Models\Student;
 use Filament\Forms;
 use Filament\Tables;
 use Filament\Resources\Resource;
@@ -13,45 +13,55 @@ use Illuminate\Database\Eloquent\Builder;
 
 class StudentResource extends Resource
 {
-    protected static ?string $model = User::class;
-
-    protected static ?string $navigationLabel = 'Students';
+    protected static ?string $model = Student::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
-    protected static ?string $navigationGroup = 'Users';
+    protected static ?string $navigationGroup = 'Usuários';
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Alunos';
+    }
 
     public static function form(FilamentForm $form): FilamentForm
     {
         return $form->schema([
-            Forms\Components\Section::make('Personal Information')
+            Forms\Components\Section::make('Informações Pessoais')
                 ->schema([
                     Forms\Components\TextInput::make('name')
                         ->required()
-                        ->maxLength(255),
+                        ->maxLength(255)
+                        ->label('Nome'),
                     Forms\Components\TextInput::make('phone')
                         ->required()
                         ->maxLength(40)
-                        ->tel(),
+                        ->tel()
+                        ->mask('(99) 99999-9999')
+                        ->placeholder('(21) 96447-0631')
+                        ->label('Telefone'),
                     Forms\Components\TextInput::make('email')
                         ->email()
                         ->maxLength(255)
-                        ->unique(ignoreRecord: true),
+                        ->unique(ignoreRecord: true)
+                        ->label('Email'),
                 ])->columns(2),
 
-            Forms\Components\Section::make('Account Settings')
+            Forms\Components\Section::make('Configurações da Conta')
                 ->schema([
-                    Forms\Components\Select::make('role')
+                    Forms\Components\CheckboxList::make('role')
                         ->options([
-                            'student' => 'Student',
-                            'staff' => 'Staff',
-                            'admin' => 'Admin',
+                            'student' => 'Aluno',
+                            'staff' => 'Professor',
+                            'admin' => 'Administrador',
                         ])
-                        ->default('student')
+                        ->default(['student'])
                         ->required()
+                        ->columns(3)
+                        ->label('Perfis')
                         ->visible(fn (): bool => auth()->user()->isAdmin()),
                     Forms\Components\Toggle::make('email_verified_at')
-                        ->label('Email Verified')
+                        ->label('Email Verificado')
                         ->default(true)
                         ->dehydrated(false)
                         ->afterStateHydrated(function ($component, $state) {
@@ -66,18 +76,18 @@ class StudentResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->label('Nome'),
                 Tables\Columns\TextColumn::make('phone')
                     ->searchable()
-                    ->toggleable(),
+                    ->toggleable()
+                    ->label('Telefone'),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable()
-                    ->toggleable(),
+                    ->toggleable()
+                    ->label('Email'),
                 Tables\Columns\TextColumn::make('role')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
@@ -86,28 +96,36 @@ class StudentResource extends Resource
                         'student' => 'success',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn (string $state): string => ucfirst($state))
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'admin' => 'Administrador',
+                        'staff' => 'Professor',
+                        'student' => 'Aluno',
+                        default => ucfirst($state),
+                    })
                     ->sortable()
-                    ->toggleable(),
+                    ->toggleable()
+                    ->label('Perfil'),
                 Tables\Columns\TextColumn::make('enrollments_count')
                     ->counts('enrollments')
-                    ->label('Enrollments')
+                    ->label('Matrículas')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->label('Criado em'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('role')
                     ->options([
-                        'student' => 'Student',
-                        'staff' => 'Staff',
-                        'admin' => 'Admin',
+                        'student' => 'Aluno',
+                        'staff' => 'Professor',
+                        'admin' => 'Administrador',
                     ])
+                    ->label('Perfil')
                     ->visible(fn (): bool => auth()->user()->isAdmin()),
                 Tables\Filters\TernaryFilter::make('email_verified_at')
-                    ->label('Email Verified')
+                    ->label('Email Verificado')
                     ->nullable(),
             ])
             ->actions([
@@ -129,7 +147,7 @@ class StudentResource extends Resource
             // Admin sees all users with student role or enrolled students
             return parent::getEloquentQuery()
                 ->where(function ($query) {
-                    $query->where('role', 'student')
+                    $query->whereJsonContains('role', 'student')
                         ->orWhereHas('enrollments');
                 });
         }
@@ -138,7 +156,7 @@ class StudentResource extends Resource
             // Staff sees students who have at least one check-in in a class taught by this instructor
             // OR students currently enrolled in modalities the instructor teaches
             return parent::getEloquentQuery()
-                ->where('role', 'student')
+                ->whereJsonContains('role', 'student')
                 ->whereHas('enrollments', function ($q) use ($user) {
                     $q->whereHas('gymClass', function ($q2) use ($user) {
                         $q2->where('instructor_id', $user->id);
@@ -147,14 +165,14 @@ class StudentResource extends Resource
         }
         
         // Default: only students
-        return parent::getEloquentQuery()->where('role', 'student');
+        return parent::getEloquentQuery()->whereJsonContains('role', 'student');
     }
 
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListStudents::route('/'),
-            'create' => Pages\CreateStudent::route('/create'),
+            // 'create' => Pages\CreateStudent::route('/create'), // Students should be created via invites, not directly
             'edit' => Pages\EditStudent::route('/{record}/edit'),
         ];
     }

@@ -22,7 +22,7 @@ class Graduation extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Student::class, 'user_id');
     }
 
     public function modality()

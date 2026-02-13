@@ -3,7 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\StaffResource\Pages;
-use App\Models\User;
+use App\Models\Instructor;
 use Filament\Forms;
 use Filament\Forms\Form as FilamentForm;
 use Filament\Resources\Resource;
@@ -13,48 +13,60 @@ use Illuminate\Database\Eloquent\Builder;
 
 class StaffResource extends Resource
 {
-    protected static ?string $model = User::class;
-
-    protected static ?string $navigationLabel = 'Staff';
+    protected static ?string $model = Instructor::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
-    protected static ?string $navigationGroup = 'Users';
+    protected static ?string $navigationGroup = 'Usuários';
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Professores';
+    }
 
     public static function form(FilamentForm $form): FilamentForm
     {
         return $form->schema([
-            Forms\Components\Section::make('Personal Information')
+            Forms\Components\Section::make('Informações Pessoais')
                 ->schema([
                     Forms\Components\TextInput::make('name')
                         ->required()
-                        ->maxLength(255),
+                        ->maxLength(255)
+                        ->label('Nome'),
                     Forms\Components\TextInput::make('phone')
                         ->required()
                         ->maxLength(40)
-                        ->tel(),
+                        ->tel()
+                        ->mask('(99) 99999-9999')
+                        ->placeholder('(21) 96447-0631')
+                        ->label('Telefone'),
                     Forms\Components\TextInput::make('email')
                         ->email()
                         ->maxLength(255)
-                        ->unique(ignoreRecord: true),
+                        ->unique(ignoreRecord: true)
+                        ->label('Email'),
                 ])->columns(2),
 
-            Forms\Components\Section::make('Account Settings')
+            Forms\Components\Section::make('Configurações da Conta')
                 ->schema([
-                    Forms\Components\Select::make('role')
+                    Forms\Components\CheckboxList::make('role')
                         ->options([
-                            'staff' => 'Staff',
-                            'admin' => 'Admin',
+                            'staff' => 'Professor',
+                            'admin' => 'Administrador',
+                            'student' => 'Aluno',
                         ])
-                        ->default('staff')
+                        ->default(['staff'])
                         ->required()
+                        ->columns(3)
+                        ->label('Perfis')
                         ->visible(fn (): bool => auth()->user()->isAdmin()),
                     Forms\Components\TextInput::make('password')
                         ->password()
                         ->required(fn (string $context): bool => $context === 'create')
                         ->minLength(8)
                         ->dehydrated(fn ($state) => filled($state))
-                        ->revealable(),
+                        ->revealable()
+                        ->label('Senha'),
                 ]),
         ]);
     }
@@ -65,30 +77,40 @@ class StaffResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->label('Nome'),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->label('Email'),
                 Tables\Columns\TextColumn::make('phone')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->label('Telefone'),
                 Tables\Columns\BadgeColumn::make('role')
-                    ->formatStateUsing(fn (string $state): string => ucfirst($state))
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'staff' => 'Professor',
+                        'admin' => 'Administrador',
+                        default => ucfirst($state),
+                    })
                     ->colors([
                         'warning' => 'staff',
                         'danger' => 'admin',
-                    ]),
+                    ])
+                    ->label('Perfil'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->label('Criado em'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('role')
                     ->options([
-                        'staff' => 'Staff',
-                        'admin' => 'Admin',
-                    ]),
+                        'staff' => 'Professor',
+                        'admin' => 'Administrador',
+                    ])
+                    ->label('Perfil'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -104,7 +126,6 @@ class StaffResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->whereIn('role', ['staff', 'admin'])
             ->where('id', '!=', auth()->id()); // Exclude current user
     }
 

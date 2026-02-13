@@ -4,12 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Invite extends Model
 {
     use HasFactory;
 
     protected $fillable = [
+        'name',
         'phone',
         'token',
         'role',
@@ -21,4 +23,15 @@ class Invite extends Model
         'expires_at' => 'datetime',
         'used_at' => 'datetime',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($invite) {
+            if (empty($invite->token)) {
+                $invite->token = Str::random(32);
+            }
+        });
+    }
 }

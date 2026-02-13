@@ -1,6 +1,6 @@
 <x-layouts::auth>
     <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Create an account')" :description="__('Enter your details below to create your account')" />
+        <x-auth-header :title="__('Create an account')" :description="__('Enter your details below to create your account. Phone number is required, email is optional.')" />
 
         <!-- Session Status -->
         <x-auth-session-status class="text-center" :status="session('status')" />
@@ -19,13 +19,56 @@
                 :placeholder="__('Full name')"
             />
 
-            <!-- Email Address -->
+            <!-- Phone Number -->
+            <div x-data="{
+                phoneDisplay: '{{ old('phone') ? preg_replace('/^\+55(\d{2})(\d{5})(\d{4})$/', '($1) $2-$3', old('phone')) : '' }}',
+                actualPhone: '{{ old('phone', '') }}',
+                formatPhone() {
+                    // Remove all non-digits
+                    let digits = this.phoneDisplay.replace(/\D/g, '');
+                    
+                    // Format as (XX) XXXXX-XXXX
+                    if (digits.length >= 2) {
+                        let formatted = '(' + digits.substring(0, 2);
+                        if (digits.length > 2) {
+                            formatted += ') ' + digits.substring(2, 7);
+                            if (digits.length > 7) {
+                                formatted += '-' + digits.substring(7, 11);
+                            }
+                        }
+                        this.phoneDisplay = formatted;
+                    }
+                    
+                    // Update actual phone value (digits only with +55)
+                    let fullDigits = digits;
+                    if (fullDigits.length >= 10) {
+                        this.actualPhone = '+55' + fullDigits;
+                    } else {
+                        this.actualPhone = '';
+                    }
+                }
+            }" x-init="formatPhone()">
+                <!-- Hidden input for the actual phone value that will be submitted -->
+                <input type="hidden" name="phone" x-model="actualPhone" />
+                
+                <!-- Display input for formatting only -->
+                <flux:input
+                    :label="__('Phone number')"
+                    x-model="phoneDisplay"
+                    x-on:input="formatPhone()"
+                    type="tel"
+                    required
+                    autocomplete="tel"
+                    placeholder="(11) 99999-9999"
+                />
+            </div>
+
+            <!-- Email Address (Optional) -->
             <flux:input
                 name="email"
-                :label="__('Email address')"
+                :label="__('Email address (optional)')"
                 :value="old('email')"
                 type="email"
-                required
                 autocomplete="email"
                 placeholder="email@example.com"
             />

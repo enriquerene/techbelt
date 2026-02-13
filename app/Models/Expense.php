@@ -33,7 +33,7 @@ class Expense extends Model
 
     public function staff()
     {
-        return $this->belongsTo(User::class, 'staff_id');
+        return $this->belongsTo(Instructor::class, 'staff_id');
     }
 
     // Category constants
@@ -47,12 +47,12 @@ class Expense extends Model
     public static function categories(): array
     {
         return [
-            self::CATEGORY_STAFF_PAYMENT => 'Staff Payment',
-            self::CATEGORY_MAINTENANCE => 'Maintenance',
+            self::CATEGORY_STAFF_PAYMENT => 'Pagamento de Funcionário',
+            self::CATEGORY_MAINTENANCE => 'Manutenção',
             self::CATEGORY_MARKETING => 'Marketing',
-            self::CATEGORY_SUPPLIES => 'Supplies',
-            self::CATEGORY_EQUIPMENT => 'Equipment',
-            self::CATEGORY_OTHER => 'Other',
+            self::CATEGORY_SUPPLIES => 'Suprimentos',
+            self::CATEGORY_EQUIPMENT => 'Equipamento',
+            self::CATEGORY_OTHER => 'Outro',
         ];
     }
 
@@ -65,9 +65,9 @@ class Expense extends Model
     public static function paymentMethods(): array
     {
         return [
-            self::PAYMENT_METHOD_CASH => 'Cash',
-            self::PAYMENT_METHOD_BANK_TRANSFER => 'Bank Transfer',
-            self::PAYMENT_METHOD_CREDIT_CARD => 'Credit Card',
+            self::PAYMENT_METHOD_CASH => 'Dinheiro',
+            self::PAYMENT_METHOD_BANK_TRANSFER => 'Transferência Bancária',
+            self::PAYMENT_METHOD_CREDIT_CARD => 'Cartão de Crédito',
             self::PAYMENT_METHOD_PIX => 'PIX',
         ];
     }

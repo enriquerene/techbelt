@@ -4,7 +4,7 @@
         <div class="flex justify-between items-center">
             @foreach(['Modalidades', 'Turmas', 'Cálculo', 'Pagamento'] as $index => $label)
                 <div class="flex flex-col items-center">
-                    <div class="w-10 h-10 rounded-full flex items-center justify-center {{ $step > $index + 1 ? 'bg-green-500 text-white' : ($step == $index + 1 ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-600') }}">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center {{ $step > $index + 1 ? 'bg-green-500 text-white' : ($step == $index + 1 ? 'bg-indigo-600 text-black' : 'bg-gray-200 text-gray-600') }}">
                         {{ $index + 1 }}
                     </div>
                     <span class="mt-2 text-sm font-medium {{ $step >= $index + 1 ? 'text-indigo-600' : 'text-gray-500' }}">{{ $label }}</span>
