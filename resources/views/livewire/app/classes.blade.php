@@ -15,7 +15,7 @@
                             
                             @if($class->instructor)
                                 <p class="text-xs text-slate-500 dark:text-slate-500 mb-3">
-                                    <strong>Instrutor:</strong> {{ $class->instructor->name }}
+                                    <strong>Professor:</strong> {{ $class->instructor->name }}
                                 </p>
                             @endif
 
