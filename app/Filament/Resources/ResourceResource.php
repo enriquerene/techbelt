@@ -17,6 +17,10 @@ class ResourceResource extends Resource
 {
     protected static ?string $model = ResourceItem::class;
 
+    protected static ?string $modelLabel = 'Recurso';
+
+    protected static ?string $pluralModelLabel = 'Recursos';
+
     protected static ?string $navigationIcon = 'heroicon-o-cube';
 
     protected static ?string $navigationGroup = 'Financeiro';

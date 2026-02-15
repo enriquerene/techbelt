@@ -15,7 +15,11 @@ class StaffResource extends Resource
 {
     protected static ?string $model = Instructor::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    protected static ?string $modelLabel = 'Professor';
+
+    protected static ?string $pluralModelLabel = 'Professores';
+
+    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
 
     protected static ?string $navigationGroup = 'Usuários';
 
@@ -51,13 +55,14 @@ class StaffResource extends Resource
                 ->schema([
                     Forms\Components\CheckboxList::make('role')
                         ->options([
-                            'staff' => 'Professor',
+                            'staff' => 'Funcionário',
                             'admin' => 'Administrador',
+                            'instructor' => 'Professor',
                             'student' => 'Aluno',
                         ])
-                        ->default(['staff'])
+                        ->default(['admin'])
                         ->required()
-                        ->columns(3)
+                        ->columns(2)
                         ->label('Perfis')
                         ->visible(fn (): bool => auth()->user()->isAdmin()),
                     Forms\Components\TextInput::make('password')
@@ -89,12 +94,15 @@ class StaffResource extends Resource
                     ->label('Telefone'),
                 Tables\Columns\BadgeColumn::make('role')
                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'staff' => 'Professor',
+                        'staff' => 'Funcionário',
+                        'instructor' => 'Professor',
                         'admin' => 'Administrador',
+                        'student' => 'Aluno',
                         default => ucfirst($state),
                     })
                     ->colors([
-                        'warning' => 'staff',
+                        'success' => 'student',
+                        'warning' => fn ($state) => in_array($state, ['staff', 'instructor']),
                         'danger' => 'admin',
                     ])
                     ->label('Perfil'),
@@ -107,8 +115,9 @@ class StaffResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('role')
                     ->options([
-                        'staff' => 'Professor',
+                        'staff' => 'Funcionário',
                         'admin' => 'Administrador',
+                        'instructor' => 'Professor',
                     ])
                     ->label('Perfil'),
             ])
@@ -121,12 +130,6 @@ class StaffResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
-    }
-
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()
-            ->where('id', '!=', auth()->id()); // Exclude current user
     }
 
     public static function getPages(): array

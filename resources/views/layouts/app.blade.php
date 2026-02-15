@@ -8,6 +8,7 @@
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
+    @filamentStyles
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 antialiased">
     <div class="min-h-screen flex flex-col pb-20 md:pb-0">
@@ -28,11 +29,7 @@
                         </button>
                         
                         <!-- User Menu -->
-                        <button class="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                            </svg>
-                        </button>
+                        <x-desktop-user-menu />
                     </div>
                 </div>
             </div>
@@ -85,5 +82,6 @@
     </div>
 
     @livewireScripts
+    @fluxScripts
 </body>
 </html>

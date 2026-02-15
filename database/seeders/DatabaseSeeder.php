@@ -37,63 +37,74 @@ class DatabaseSeeder extends Seeder
             $this->command->info("Created pricing tier: {$pricingTier->name}");
         }
 
-        // 1. Student without enrollment (for testing onboarding flow)
-        $studentWithoutEnrollment = User::factory()->create([
-            'name' => 'João Silva (Student - No Subscription)',
-            'email' => 'joao.silva@example.com',
-            'phone' => '+55 (11) 98765-4321',
-            'role' => \App\Models\User::ROLE_STUDENT,
-        ]);
-        
-        $this->command->info("Created student without subscription: joao.silva@example.com / password");
+        // Clean up any existing users
+        User::query()->delete();
+        $this->command->info("Cleaned up existing users");
 
-        // 2. Student with subscription (for testing app access)
-        $studentWithSubscription = User::factory()->create([
-            'name' => 'Maria Santos (Student - With Subscription)',
-            'email' => 'maria.santos@example.com',
-            'phone' => '+55 (21) 99876-5432',
-            'role' => \App\Models\User::ROLE_STUDENT,
+        // 1. Rafael Scotelaro - Admin & Instructor
+        $rafael = User::factory()->create([
+            'name' => 'Rafael Scotelaro',
+            'email' => 'rafael@scotelaro.com',
+            'phone' => '+5521970179121',
+            'password' => 'password',
+            'role' => [User::ROLE_ADMIN, 'instructor'],
         ]);
         
-        // Create a subscription for this student (using only existing columns)
-        $studentWithSubscription->subscriptions()->create([
+        $this->command->info("Created Rafael Scotelaro: rafael@scotelaro.com / password");
+
+        // 2. Tamires Scotelaro - Admin & Student
+        $tamires = User::factory()->create([
+            'name' => 'Tamires Scotelaro',
+            'email' => 'tamires@scotelaro.com',
+            'phone' => '+5521970179122',
+            'password' => 'password',
+            'role' => [User::ROLE_ADMIN, User::ROLE_STUDENT],
+        ]);
+        
+        $this->command->info("Created Tamires Scotelaro: tamires@scotelaro.com / password");
+
+        // Create a subscription for Tamires (as a student)
+        $tamires->subscriptions()->create([
             'pricing_tier_id' => $pricingTier->id,
             'starts_at' => now(),
-            'ends_at' => now()->addMonth(),
+            'ends_at' => now()->addYear(),
             'status' => 'active',
         ]);
         
-        $this->command->info("Created student with subscription: maria.santos@example.com / password");
+        $this->command->info("Created active subscription for Tamires Scotelaro");
 
-        // 3. Admin user (for creating resources manually)
-        $adminUser = User::factory()->admin()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@scotelaro.com',
-            'phone' => '+55 (31) 91234-5678',
+        // 3. Create a test student for onboarding flow
+        $testStudent = User::factory()->create([
+            'name' => 'Estudante Teste',
+            'email' => 'estudante@teste.com',
+            'phone' => '+5511999999999',
+            'password' => 'password',
+            'role' => User::ROLE_STUDENT,
         ]);
         
-        $this->command->info("Created admin user: admin@scotelaro.com / password");
+        $this->command->info("Created test student: estudante@teste.com / password");
 
-        // 4. Staff user (optional, for testing different roles)
-        $staffUser = User::factory()->staff()->create([
-            'name' => 'Carlos Oliveira (Staff)',
-            'email' => 'carlos.oliveira@example.com',
-            'phone' => '+55 (41) 92345-6789',
-        ]);
-        
-        $this->command->info("Created staff user: carlos.oliveira@example.com / password");
-
-        // Create a few more random students for testing
-        User::factory()->count(3)->create([
-            'role' => \App\Models\User::ROLE_STUDENT,
-        ]);
-        
-        $this->command->info("Created 3 additional random student users");
-        $this->command->info("\n=== Login Credentials ===");
-        $this->command->info("All users have password: 'password'");
-        $this->command->info("Student (no subscription): joao.silva@example.com");
-        $this->command->info("Student (with subscription): maria.santos@example.com");
-        $this->command->info("Admin: admin@scotelaro.com");
-        $this->command->info("Staff: carlos.oliveira@example.com");
+        $this->command->info("\n=== CREDENCIAIS PADRÃO ===");
+        $this->command->info("Todos os usuários usam senha: 'password'");
+        $this->command->info("1. Rafael Scotelaro (Admin & Instructor)");
+        $this->command->info("   Email: rafael@scotelaro.com");
+        $this->command->info("   Telefone: +5521970179121");
+        $this->command->info("   Papéis: admin, instructor");
+        $this->command->info("");
+        $this->command->info("2. Tamires Scotelaro (Admin & Student)");
+        $this->command->info("   Email: tamires@scotelaro.com");
+        $this->command->info("   Telefone: +5521970179122");
+        $this->command->info("   Papéis: admin, student");
+        $this->command->info("   Possui matrícula ativa: Sim");
+        $this->command->info("");
+        $this->command->info("3. Estudante Teste (Student)");
+        $this->command->info("   Email: estudante@teste.com");
+        $this->command->info("   Telefone: +5511999999999");
+        $this->command->info("   Papéis: student");
+        $this->command->info("");
+        $this->command->info("=== PAINÉIS DE ACESSO ===");
+        $this->command->info("• Painel Admin: http://localhost:8000/admin");
+        $this->command->info("• Painel Staff: http://localhost:8000/staff");
+        $this->command->info("• Aplicativo Estudante: http://localhost:8000/app");
     }
 }

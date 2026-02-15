@@ -34,4 +34,16 @@ class Invite extends Model
             }
         });
     }
+
+    /**
+     * Normalize phone number before saving.
+     */
+    public function setPhoneAttribute(?string $value): void
+    {
+        if ($value) {
+            $this->attributes['phone'] = \App\Helpers\PhoneNormalizer::normalize($value);
+        } else {
+            $this->attributes['phone'] = null;
+        }
+    }
 }

@@ -14,7 +14,10 @@ class InviteController extends Controller
     {
         $invite = Invite::where('token', $token)
             ->whereNull('used_at')
-            ->where('expires_at', '>', now())
+            ->where(function ($query) {
+                $query->whereNull('expires_at')
+                      ->orWhere('expires_at', '>', now());
+            })
             ->firstOrFail();
 
         return view('invite.accept', compact('invite'));
@@ -24,11 +27,15 @@ class InviteController extends Controller
     {
         $invite = Invite::where('token', $token)
             ->whereNull('used_at')
-            ->where('expires_at', '>', now())
+            ->where(function ($query) {
+                $query->whereNull('expires_at')
+                      ->orWhere('expires_at', '>', now());
+            })
             ->firstOrFail();
 
         $request->validate([
             'password' => 'required|string|min:8|confirmed',
+            'terms' => 'required|accepted',
         ]);
 
         $user = User::create([

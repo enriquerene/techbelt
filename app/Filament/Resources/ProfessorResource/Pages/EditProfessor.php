@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\ResourceResource\Pages;
+namespace App\Filament\Resources\ProfessorResource\Pages;
 
-use App\Filament\Resources\ResourceResource;
+use App\Filament\Resources\ProfessorResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
-class EditResource extends EditRecord
+class EditProfessor extends EditRecord
 {
-    protected static string $resource = ResourceResource::class;
+    protected static string $resource = ProfessorResource::class;
 
     protected function getHeaderActions(): array
     {
@@ -16,6 +16,7 @@ class EditResource extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');

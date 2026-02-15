@@ -18,9 +18,15 @@ use Filament\Resources\Components\Tab;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\HtmlString;
 
+use function Pest\Laravel\json;
+
 class EnrollmentResource extends Resource
 {
     protected static ?string $model = Enrollment::class;
+
+    protected static ?string $modelLabel = 'Matrícula';
+
+    protected static ?string $pluralModelLabel = 'Matrículas';
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
@@ -164,9 +170,13 @@ class EnrollmentResource extends Resource
                 ->schema([
                     Forms\Components\DateTimePicker::make('enrolled_at')
                         ->default(now())
+                        ->seconds(false)
+                        ->displayFormat("d/m/Y H:i")
                         ->label('Data de Matrícula'),
                     Forms\Components\DateTimePicker::make('next_billing_date')
                         ->default(now()->addMonth())
+                        ->seconds(false)
+                        ->displayFormat("d/m/Y H:i")
                         ->label('Próxima Data de Cobrança'),
                 ])->columns(2),
 
@@ -412,7 +422,7 @@ class EnrollmentResource extends Resource
                         Infolists\Components\TextEntry::make('final_price')
                             ->money('BRL')
                             ->label('Valor')
-                            ->description(function (Enrollment $record) {
+                            ->helperText(function (Enrollment $record) {
                                 if ($record->is_custom_price) {
                                     return 'Valor personalizado (padrão: R$ ' . number_format($record->pricingTier->price, 2, ',', '.') . ')';
                                 }
@@ -431,10 +441,30 @@ class EnrollmentResource extends Resource
                                     ->label('Turma'),
                                 Infolists\Components\TextEntry::make('modality.name')
                                     ->label('Modalidade'),
+                                Infolists\Components\TextEntry::make('instructor')
+                                    ->label('Professor')
+                                    ->formatStateUsing(function ($record) {
+                                        $data = json_decode($record, true);
+                                        return $data['instructor']['name'];
+                                    }),
                                 Infolists\Components\TextEntry::make('schedule')
-                                    ->label('Horário'),
+                                    ->label('Horário')
+                                    ->formatStateUsing(function($record) {
+                                        $schedule = json_decode($record->schedule, true);
+                                        $dayName = [
+                                            'mon' => 'Segunda',
+                                            'tue' => 'Terça',
+                                            'wed' => 'Quarta',
+                                            'thu' => 'Quinta',
+                                            'fri' => 'Sexta',
+                                            'sat' => 'Sábado',
+                                        ];
+                                        $time = $schedule['time'];
+                                        $days = array_map(fn ($d) => $dayName[$d], $schedule['days']);
+                                        return implode(', ', $days) . ' - ' . $time;
+                                    }),
                             ])
-                            ->columns(3)
+                            ->columns(4)
                             ->label('')
                             ->hidden(fn (Enrollment $record) => $record->classes->isEmpty()),
                         Infolists\Components\TextEntry::make('classes_summary')

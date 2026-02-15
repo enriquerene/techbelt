@@ -16,6 +16,10 @@ class PricingTierResource extends Resource
 {
     protected static ?string $model = PricingTier::class;
 
+    protected static ?string $modelLabel = 'Plano';
+
+    protected static ?string $pluralModelLabel = 'Planos';
+
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
 
     public static function getNavigationLabel(): string

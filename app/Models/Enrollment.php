@@ -120,12 +120,17 @@ class Enrollment extends Model
 
     public function setIsCustomPriceAttribute($value)
     {
-        $this->attributes['is_custom_price'] = (bool) $value;
+        $value = (bool) $value;
+        $this->attributes['is_custom_price'] = $value;
         
-        // If custom price is false and amount is null, we should keep it null
-        // If custom price is true but amount is null, we should set it to pricing tier price
-        if ($value && $this->amount === null) {
-            $this->amount = $this->pricingTier?->price ?? 0;
+        if ($value) {
+            // If setting custom price to true and amount is null, set it to pricing tier price
+            if ($this->amount === null) {
+                $this->attributes['amount'] = $this->pricingTier?->price ?? 0;
+            }
+        } else {
+            // If setting custom price to false, set amount to null (will use plan price)
+            $this->attributes['amount'] = null;
         }
     }
 
@@ -136,6 +141,9 @@ class Enrollment extends Model
         // If amount is set (not null), automatically mark as custom price
         if ($value !== null) {
             $this->attributes['is_custom_price'] = true;
+        } else {
+            // If amount is null, it's not a custom price
+            $this->attributes['is_custom_price'] = false;
         }
     }
 

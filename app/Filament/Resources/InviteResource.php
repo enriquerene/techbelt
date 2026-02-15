@@ -14,6 +14,10 @@ class InviteResource extends Resource
 {
     protected static ?string $model = Invite::class;
 
+    protected static ?string $modelLabel = 'Convite';
+
+    protected static ?string $pluralModelLabel = 'Convites';
+
     protected static ?string $navigationIcon = 'heroicon-o-paper-airplane';
 
     protected static ?string $navigationGroup = 'Usuários';
@@ -21,6 +25,18 @@ class InviteResource extends Resource
     public static function getNavigationLabel(): string
     {
         return 'Convites';
+    }
+
+    public static function mutateFormDataBeforeCreate(array $data): array
+    {
+        $data['phone'] = \App\Helpers\PhoneNormalizer::normalize($data['phone'] ?? '');
+        return $data;
+    }
+
+    public static function mutateFormDataBeforeSave(array $data): array
+    {
+        $data['phone'] = \App\Helpers\PhoneNormalizer::normalize($data['phone'] ?? '');
+        return $data;
     }
 
     public static function form(FilamentForm $form): FilamentForm
@@ -44,7 +60,7 @@ class InviteResource extends Resource
                         ->label('Convite para')
                         ->options([
                             'student' => 'Aluno',
-                            'staff' => 'Professor/Instrutor',
+                            'staff' => 'Professor',
                             'admin' => 'Administrador',
                         ])
                         ->default('student')
@@ -89,6 +105,14 @@ class InviteResource extends Resource
                     ->sortable()
                     ->label('Expira em')
                     ->placeholder('Nunca'),
+                Tables\Columns\BadgeColumn::make('used_at')
+                    ->label('Status')
+                    ->formatStateUsing(fn ($state) => $state ? 'Usado' : 'Pendente')
+                    ->colors([
+                        'success' => fn ($state) => !$state,
+                        'danger' => fn ($state) => (bool) $state,
+                    ])
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('invite_link')
                     ->label('Link do Convite')
                     ->getStateUsing(function ($record) {
@@ -101,6 +125,9 @@ class InviteResource extends Resource
                     ->copyable()
                     ->copyableState(fn ($record) => route('invite.show', $record->token))
                     ->color(function ($record) {
+                        if ($record->used_at) {
+                            return 'gray';
+                        }
                         if ($record->expires_at && $record->expires_at->isPast()) {
                             return 'danger';
                         }
@@ -113,6 +140,21 @@ class InviteResource extends Resource
                     ->sortable()
                     ->label('Criado em')
                     ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                Tables\Filters\TernaryFilter::make('used_at')
+                    ->label('Status')
+                    ->nullable()
+                    ->placeholder('Todos')
+                    ->trueLabel('Usados')
+                    ->falseLabel('Pendentes'),
+                Tables\Filters\SelectFilter::make('role')
+                    ->options([
+                        'student' => 'Aluno',
+                        'staff' => 'Professor',
+                        'admin' => 'Administrador',
+                    ])
+                    ->label('Perfil'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()

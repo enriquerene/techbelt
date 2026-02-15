@@ -18,7 +18,7 @@
 
                         @if($enrollment->gymClass->instructor)
                             <p class="text-sm text-slate-600 dark:text-slate-400 mb-3">
-                                <strong>Instrutor:</strong> {{ $enrollment->gymClass->instructor->name }}
+                                <strong>Professor:</strong> {{ $enrollment->gymClass->instructor->name }}
                             </p>
                         @endif
 

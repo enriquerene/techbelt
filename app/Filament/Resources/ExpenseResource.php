@@ -17,6 +17,10 @@ class ExpenseResource extends Resource
 {
     protected static ?string $model = Expense::class;
 
+    protected static ?string $modelLabel = 'Despesa';
+
+    protected static ?string $pluralModelLabel = 'Despesas';
+
     protected static ?string $navigationIcon = 'heroicon-o-arrow-trending-down';
 
     protected static ?string $navigationGroup = 'Financeiro';
@@ -62,7 +66,11 @@ class ExpenseResource extends Resource
                 ->schema([
                     Forms\Components\Select::make('staff_id')
                         ->label('Membro da Equipe (se pagamento de funcionário)')
-                        ->options(User::whereIn('role', ['staff', 'admin'])->pluck('name', 'id'))
+                        ->options(function () {
+                            return \App\Models\User::whereJsonContains('role', 'staff')
+                                ->orWhereJsonContains('role', 'instructor')
+                                ->pluck('name', 'id');
+                        })
                         ->searchable()
                         ->nullable(),
                     Forms\Components\Textarea::make('notes')

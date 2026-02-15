@@ -21,7 +21,8 @@ class Instructor extends User
         static::addGlobalScope('instructor', function (Builder $builder) {
             $builder->where(function ($query) {
                 $query->whereJsonContains('role', self::ROLE_STAFF)
-                      ->orWhereJsonContains('role', self::ROLE_ADMIN);
+                      ->orWhereJsonContains('role', self::ROLE_ADMIN)
+                      ->orWhereJsonContains('role', 'instructor');
             });
         });
     }

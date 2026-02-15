@@ -29,8 +29,19 @@ return new class extends Migration
             
             // Remove class_id column (replaced with many-to-many relationship)
             if (Schema::hasColumn('enrollments', 'class_id')) {
-                // First drop the foreign key constraint (using the conventional name)
-                $table->dropForeign('enrollments_class_id_foreign');
+                // Try to drop the foreign key if it exists
+                try {
+                    $table->dropForeign(['class_id']);
+                } catch (\Exception $e) {
+                    // Foreign key might not exist or have a different name
+                    // Try to drop it by conventional name
+                    try {
+                        $table->dropForeign('enrollments_class_id_foreign');
+                    } catch (\Exception $e2) {
+                        // Ignore if foreign key doesn't exist
+                    }
+                }
+                
                 // Then drop the unique constraint
                 $table->dropUnique('enrollments_user_id_class_id_unique');
                 // Finally drop the column
