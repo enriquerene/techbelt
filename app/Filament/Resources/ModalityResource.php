@@ -17,6 +17,10 @@ class ModalityResource extends Resource
 {
     protected static ?string $model = Modality::class;
 
+    protected static ?string $modelLabel = 'Modalidade';
+
+    protected static ?string $pluralModelLabel = 'Modalidades';
+
     protected static ?string $navigationIcon = 'heroicon-o-tag';
 
     public static ?string $title = 'Modalidade';

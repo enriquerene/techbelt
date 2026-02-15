@@ -4,7 +4,6 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\GymClassResource\Pages;
 use App\Models\GymClass;
-use App\Models\User;
 use Filament\Forms;
 use Filament\Tables;
 use Filament\Resources\Resource;
@@ -14,6 +13,10 @@ use Filament\Tables\Table as FilamentTable;
 class GymClassResource extends Resource
 {
     protected static ?string $model = GymClass::class;
+
+    protected static ?string $modelLabel = 'Turma';
+
+    protected static ?string $pluralModelLabel = 'Turmas';
 
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
 
@@ -79,12 +82,15 @@ class GymClassResource extends Resource
                         ->seconds(false)
                         ->format('H:i')
                         ->displayFormat('H:i')
+                        ->extraAttributes(['step' => 60])
                         ->helperText('Horário em que a aula começa')
                         ->dehydrated(false)
                         ->afterStateHydrated(function ($component, $state, $record) {
                             if ($record && $record->schedule) {
                                 $schedule = is_array($record->schedule) ? $record->schedule : json_decode($record->schedule, true);
-                                $component->state($schedule['time'] ?? '19:00');
+                                // Garante que o valor inicial seja algo como '19:00' e não '07:00 PM'
+                                $time = $schedule['time'] ?? '19:00';
+                                $component->state(date('H:i', strtotime($time)));
                             }
                         }),
                     Forms\Components\Hidden::make('schedule')

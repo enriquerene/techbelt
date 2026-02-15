@@ -51,13 +51,13 @@ class AdminPanelProvider extends PanelProvider
                 Widgets\FilamentInfoWidget::class,
             ])
             ->resources([
-                \App\Filament\Resources\StudentResource::class,
+                \App\Filament\Resources\InviteResource::class,
                 \App\Filament\Resources\StaffResource::class,
+                \App\Filament\Resources\StudentResource::class,
                 \App\Filament\Resources\EnrollmentResource::class,
                 \App\Filament\Resources\ModalityResource::class,
                 \App\Filament\Resources\GymClassResource::class,
                 \App\Filament\Resources\PricingTierResource::class,
-                \App\Filament\Resources\InviteResource::class,
                 \App\Filament\Resources\ExpenseResource::class,
                 \App\Filament\Resources\ResourceResource::class,
             ])
