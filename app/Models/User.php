@@ -113,6 +113,18 @@ class User extends Authenticatable
         }
     }
 
+    /**
+     * Get formatted phone number for display.
+     */
+    public function getFormattedPhoneAttribute(): ?string
+    {
+        if (!$this->phone) {
+            return null;
+        }
+        
+        return \App\Helpers\PhoneNormalizer::formatForDisplay($this->phone);
+    }
+
     // Relationships for Student App
     public function subscriptions()
     {
