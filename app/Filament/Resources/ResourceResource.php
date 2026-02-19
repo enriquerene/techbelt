@@ -58,20 +58,6 @@ class ResourceResource extends Resource
                             ->minValue(0)
                             ->default(1)
                             ->label('Quantidade'),
-                        Forms\Components\TextInput::make('unit_cost')
-                            ->required()
-                            ->numeric()
-                            ->minValue(0)
-                            ->prefix('R$')
-                            ->label('Custo Unitário'),
-                        Forms\Components\TextInput::make('total_cost')
-                            ->numeric()
-                            ->minValue(0)
-                            ->prefix('R$')
-                            ->label('Custo Total')
-                            ->disabled()
-                            ->dehydrated()
-                            ->helperText('Calculado automaticamente: quantidade × custo unitário'),
                     ])
                     ->columns(2),
                 
@@ -92,16 +78,6 @@ class ResourceResource extends Resource
                             ->label('Status'),
                     ])
                     ->columns(3),
-                
-                Forms\Components\Section::make('Responsabilidade')
-                    ->schema([
-                        Forms\Components\Select::make('responsible_user_id')
-                            ->label('Pessoa Responsável')
-                            ->relationship('responsibleUser', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->nullable(),
-                    ]),
             ]);
     }
 
@@ -129,14 +105,6 @@ class ResourceResource extends Resource
                     ->numeric()
                     ->sortable()
                     ->label('Quantidade'),
-                Tables\Columns\TextColumn::make('unit_cost')
-                    ->money('BRL')
-                    ->sortable()
-                    ->label('Custo Unitário'),
-                Tables\Columns\TextColumn::make('total_cost')
-                    ->money('BRL')
-                    ->sortable()
-                    ->label('Custo Total'),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
@@ -157,10 +125,6 @@ class ResourceResource extends Resource
                     ->sortable()
                     ->placeholder('Não agendada')
                     ->label('Próxima Manutenção'),
-                Tables\Columns\TextColumn::make('responsibleUser.name')
-                    ->label('Responsável')
-                    ->searchable()
-                    ->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('category')
