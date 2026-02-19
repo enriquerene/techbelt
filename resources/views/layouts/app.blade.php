@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'Scotelaro') }}</title>
+    <title>{{ config('app.name', 'Tech Belt') }}</title>
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
@@ -17,7 +17,7 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 md:py-4">
                 <div class="flex items-center justify-between">
                     <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">
-                        {{ config('app.name', 'Scotelaro') }}
+                        {{ config('app.name', 'Tech Belt') }}
                     </h1>
                     <div class="flex items-center gap-2">
                         <!-- Notifications Bell -->

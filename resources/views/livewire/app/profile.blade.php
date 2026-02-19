@@ -20,7 +20,7 @@
                         <p class="text-slate-600 dark:text-slate-400">{{ $user->email }}</p>
                     @endif
                     @if($user->phone)
-                        <p class="text-slate-600 dark:text-slate-400">{{ $user->phone }}</p>
+                        <p class="text-slate-600 dark:text-slate-400">{{ \App\Helpers\PhoneNormalizer::formatForDisplay($user->phone) }}</p>
                     @endif
                 </div>
             </div>

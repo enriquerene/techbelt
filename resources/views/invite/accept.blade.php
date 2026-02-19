@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aceitar Convite - Scotelaro</title>
+    <title>Aceitar Convite - Tech Belt</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <!-- Load Filament styles if needed -->
     @filamentStyles
@@ -12,8 +12,8 @@
     <div class="max-w-md w-full p-6 bg-white rounded-lg shadow-md dark:bg-gray-800 dark:text-gray-100">
         <div class="text-center mb-6">
             <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Complete seu Cadastro</h1>
-            <p class="text-gray-600 dark:text-gray-300 mt-2">Você foi convidado para o Scotelaro como <strong>{{ $invite->role === 'student' ? 'aluno' : ($invite->role === 'staff' ? 'professor' : 'administrador') }}</strong>.</p>
-            <p class="text-gray-600 dark:text-gray-300">Telefone: <strong>{{ $invite->phone }}</strong></p>
+            <p class="text-gray-600 dark:text-gray-300 mt-2">Você foi convidado para o Tech Belt como <strong>{{ $invite->role === 'student' ? 'aluno' : ($invite->role === 'staff' ? 'professor' : 'administrador') }}</strong>.</p>
+            <p class="text-gray-600 dark:text-gray-300">Telefone: <strong>{{ \App\Helpers\PhoneNormalizer::formatForDisplay($invite->phone) }}</strong></p>
             @if($invite->name)
                 <p class="text-gray-600 dark:text-gray-300">Nome: <strong>{{ $invite->name }}</strong></p>
             @endif

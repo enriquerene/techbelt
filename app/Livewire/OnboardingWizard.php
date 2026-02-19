@@ -191,6 +191,6 @@ class OnboardingWizard extends Component
         $this->isProcessing = false;
         
         // Redirect to app with success message
-        return redirect()->route('app.home')->with('success', 'Subscription created successfully! Welcome to Scotelaro!');
+        return redirect()->route('app.home')->with('success', 'Subscription created successfully! Welcome to Tech Belt!');
     }
 }

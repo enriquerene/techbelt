@@ -10,7 +10,7 @@
 
             <!-- Phone Number -->
             <div x-data="{
-                phoneDisplay: '{{ old('phone') ? preg_replace('/^\+55(\d{2})(\d{5})(\d{4})$/', '($1) $2-$3', old('phone')) : '' }}',
+                phoneDisplay: '{{ old('phone') ? \App\Helpers\PhoneNormalizer::formatForDisplay(old('phone')) : '' }}',
                 actualPhone: '{{ old('phone', '') }}',
                 formatPhone() {
                     // Remove all non-digits
@@ -28,10 +28,10 @@
                         this.phoneDisplay = formatted;
                     }
                     
-                    // Update actual phone value (digits only with +55)
+                    // Update actual phone value (digits only)
                     let fullDigits = digits;
                     if (fullDigits.length >= 10) {
-                        this.actualPhone = '+55' + fullDigits;
+                        this.actualPhone = fullDigits;
                     } else {
                         this.actualPhone = '';
                     }
