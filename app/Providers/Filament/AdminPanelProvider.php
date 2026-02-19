@@ -37,13 +37,13 @@ class AdminPanelProvider extends PanelProvider
                 'info' => Color::Blue,
             ])
             ->font('Inter')
-            ->brandName('Scotelaro Admin')
+            ->brandName('Tech Belt Admin')
             ->brandLogo(asset('logo.png'))
             ->favicon(asset('favicon.png'))
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                \App\Filament\Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
@@ -55,6 +55,7 @@ class AdminPanelProvider extends PanelProvider
                 \App\Filament\Resources\StaffResource::class,
                 \App\Filament\Resources\StudentResource::class,
                 \App\Filament\Resources\EnrollmentResource::class,
+                \App\Filament\Resources\PaymentResource::class,
                 \App\Filament\Resources\ModalityResource::class,
                 \App\Filament\Resources\GymClassResource::class,
                 \App\Filament\Resources\PricingTierResource::class,

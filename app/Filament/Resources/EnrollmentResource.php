@@ -410,7 +410,8 @@ class EnrollmentResource extends Resource
                         Infolists\Components\TextEntry::make('user.name')
                             ->label('Nome do Aluno'),
                         Infolists\Components\TextEntry::make('user.phone')
-                            ->label('Telefone'),
+                            ->label('Telefone')
+                            ->formatStateUsing(fn ($state) => \App\Helpers\PhoneNormalizer::formatForDisplay($state)),
                         Infolists\Components\TextEntry::make('user.email')
                             ->label('E-mail'),
                     ])->columns(3),

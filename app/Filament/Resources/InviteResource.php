@@ -85,7 +85,8 @@ class InviteResource extends Resource
                 Tables\Columns\TextColumn::make('phone')
                     ->searchable()
                     ->sortable()
-                    ->label('Telefone'),
+                    ->label('Telefone')
+                    ->formatStateUsing(fn ($state) => \App\Helpers\PhoneNormalizer::formatForDisplay($state)),
                 Tables\Columns\BadgeColumn::make('role')
                     ->formatStateUsing(fn (string $state): string => match($state) {
                         'student' => 'Aluno',

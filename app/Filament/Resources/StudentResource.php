@@ -87,7 +87,8 @@ class StudentResource extends Resource
                 Tables\Columns\TextColumn::make('phone')
                     ->searchable()
                     ->toggleable()
-                    ->label('Telefone'),
+                    ->label('Telefone')
+                    ->formatStateUsing(fn ($state) => \App\Helpers\PhoneNormalizer::formatForDisplay($state)),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable()
                     ->toggleable()
