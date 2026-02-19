@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Models\Enrollment;
+use App\Filament\Widgets\MonthlyCashFlowChart;
 use Filament\Pages\Page;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -21,6 +22,8 @@ class FinancialDashboard extends Page implements HasTable
     protected static ?string $navigationLabel = 'Pagamentos';
 
     protected static ?string $navigationGroup = 'Financeiro';
+
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static string $view = 'filament.pages.financial-dashboard';
 
@@ -83,6 +86,8 @@ class FinancialDashboard extends Page implements HasTable
 
     protected function getHeaderWidgets(): array
     {
-        return [];
+        return [
+            MonthlyCashFlowChart::class,
+        ];
     }
 }

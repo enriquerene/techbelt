@@ -41,27 +41,27 @@ class DatabaseSeeder extends Seeder
         User::query()->delete();
         $this->command->info("Cleaned up existing users");
 
-        // 1. Rafael Scotelaro - Admin & Instructor
+        // 1. Rafael Silva - Admin & Instructor
         $rafael = User::factory()->create([
-            'name' => 'Rafael Scotelaro',
-            'email' => 'rafael@scotelaro.com',
+            'name' => 'Rafael Silva',
+            'email' => 'rafael@techbelt.io',
             'phone' => '+5521970179121',
             'password' => 'password',
             'role' => [User::ROLE_ADMIN, 'instructor'],
         ]);
         
-        $this->command->info("Created Rafael Scotelaro: rafael@scotelaro.com / password");
+        $this->command->info("Created Rafael Silva: rafael@techbelt.io / password");
 
-        // 2. Tamires Scotelaro - Admin & Student
+        // 2. Tamires Santos - Admin & Student
         $tamires = User::factory()->create([
-            'name' => 'Tamires Scotelaro',
-            'email' => 'tamires@scotelaro.com',
+            'name' => 'Tamires Santos',
+            'email' => 'tamires@techbelt.io',
             'phone' => '+5521970179122',
             'password' => 'password',
             'role' => [User::ROLE_ADMIN, User::ROLE_STUDENT],
         ]);
         
-        $this->command->info("Created Tamires Scotelaro: tamires@scotelaro.com / password");
+        $this->command->info("Created Tamires Santos: tamires@techbelt.io / password");
 
         // Create a subscription for Tamires (as a student)
         $tamires->subscriptions()->create([
@@ -71,7 +71,7 @@ class DatabaseSeeder extends Seeder
             'status' => 'active',
         ]);
         
-        $this->command->info("Created active subscription for Tamires Scotelaro");
+        $this->command->info("Created active subscription for Tamires Santos");
 
         // 3. Create a test student for onboarding flow
         $testStudent = User::factory()->create([
@@ -86,13 +86,13 @@ class DatabaseSeeder extends Seeder
 
         $this->command->info("\n=== CREDENCIAIS PADRÃO ===");
         $this->command->info("Todos os usuários usam senha: 'password'");
-        $this->command->info("1. Rafael Scotelaro (Admin & Instructor)");
-        $this->command->info("   Email: rafael@scotelaro.com");
+        $this->command->info("1. Rafael Silva (Admin & Instructor)");
+        $this->command->info("   Email: rafael@techbelt.io");
         $this->command->info("   Telefone: +5521970179121");
         $this->command->info("   Papéis: admin, instructor");
         $this->command->info("");
-        $this->command->info("2. Tamires Scotelaro (Admin & Student)");
-        $this->command->info("   Email: tamires@scotelaro.com");
+        $this->command->info("2. Tamires Santos (Admin & Student)");
+        $this->command->info("   Email: tamires@techbelt.io");
         $this->command->info("   Telefone: +5521970179122");
         $this->command->info("   Papéis: admin, student");
         $this->command->info("   Possui matrícula ativa: Sim");

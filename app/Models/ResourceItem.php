@@ -15,26 +15,16 @@ class ResourceItem extends Model
         'category',
         'description',
         'quantity',
-        'unit_cost',
-        'total_cost',
         'purchase_date',
         'next_maintenance_date',
         'status',
-        'responsible_user_id',
     ];
 
     protected $casts = [
         'purchase_date' => 'date',
         'next_maintenance_date' => 'date',
-        'unit_cost' => 'decimal:2',
-        'total_cost' => 'decimal:2',
         'quantity' => 'integer',
     ];
-
-    public function responsibleUser()
-    {
-        return $this->belongsTo(User::class, 'responsible_user_id');
-    }
 
     // Category constants
     const CATEGORY_FIRST_AID = 'first_aid';
@@ -72,15 +62,4 @@ class ResourceItem extends Model
         ];
     }
 
-    // Calculate total cost if not set
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::saving(function ($resourceItem) {
-            if ($resourceItem->quantity && $resourceItem->unit_cost && !$resourceItem->total_cost) {
-                $resourceItem->total_cost = $resourceItem->quantity * $resourceItem->unit_cost;
-            }
-        });
-    }
 }

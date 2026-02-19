@@ -30,7 +30,7 @@ test('admin panel has complete configuration matching requirements', function ()
     $this->assertStringContainsString('->darkMode(true)', $providerContent, 'Admin panel must force dark mode');
     
     // Check for brand configuration
-    $this->assertStringContainsString("->brandName('Scotelaro Admin')", $providerContent, 'Brand name should be set');
+    $this->assertStringContainsString("->brandName('Tech Belt Admin')", $providerContent, 'Brand name should be set');
     $this->assertStringContainsString("->brandLogo(asset('logo.png'))", $providerContent, 'Brand logo should be set');
     
     // Check for SPA mode (single page application)

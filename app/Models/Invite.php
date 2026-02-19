@@ -46,4 +46,16 @@ class Invite extends Model
             $this->attributes['phone'] = null;
         }
     }
+
+    /**
+     * Get formatted phone number for display.
+     */
+    public function getFormattedPhoneAttribute(): ?string
+    {
+        if (!$this->phone) {
+            return null;
+        }
+        
+        return \App\Helpers\PhoneNormalizer::formatForDisplay($this->phone);
+    }
 }

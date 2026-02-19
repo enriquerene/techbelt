@@ -37,7 +37,7 @@ class StaffPanelProvider extends PanelProvider
                 'info' => Color::Cyan,
             ])
             ->font('Inter')
-            ->brandName('Scotelaro Staff')
+            ->brandName('Tech Belt Staff')
             ->brandLogo(asset('logo.png'))
             ->favicon(asset('favicon.png'))
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')

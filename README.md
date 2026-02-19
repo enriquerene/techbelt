@@ -1,4 +1,4 @@
-# Scotelaro - Martial Arts Academy Management System
+# Tech Belt - Martial Arts Academy Management System
 
 ![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=flat-square&logo=laravel)
 ![Livewire](https://img.shields.io/badge/Livewire-3.x-FB70A9?style=flat-square&logo=livewire)
@@ -29,6 +29,7 @@ A comprehensive martial arts academy management system built with modern Laravel
 | **Commercial Definition** | ✅ Complete | Pricing tiers with billing periods, frequency types, modality scopes |
 | **Financial Guardrails** | ✅ Complete | Strict "no-edit" strategy for enrollments with Infolists |
 | **Financial Management Section** | ✅ Complete | Incoming payments dashboard, expenses tracking, and resources inventory |
+| **Custom Dashboard Widgets** | ✅ Complete | Business-focused dashboard with statistics, cash flow chart, and recent payments |
 | **Enrollment System Refactoring** | ✅ Complete | Multiple class enrollment, payment separation, price override functionality |
 | **PWA Setup** | ⚠️ Partial | Basic setup, needs service worker optimization |
 | **Payment Integration** | ✅ Mock Complete | Full payment flow with mock processing for testing |
@@ -51,6 +52,11 @@ The system implements a high-integrity admin experience with strict financial co
   - **Incoming Payments Dashboard** - View all student payments, subscriptions, and billing status
   - **Outcomes/Expenses Tracking** - Manage staff payments, maintenance costs, marketing expenses, and other operational costs
   - **Resources Inventory** - Track academy resources like first aid kits, equipment, marketing materials with maintenance scheduling
+- **Custom Dashboard Widgets** - Business-focused dashboard with real-time statistics:
+  - **Statistics Overview**: 4-card widget showing total students, monthly revenue, profit, and active enrollments
+  - **Monthly Cash Flow Chart**: Full-width chart tracking daily income vs expenses with accumulated balance
+  - **Recent Payments Table**: Latest completed payments with student, plan, amount, and status information
+  - **Portuguese Localization**: All dashboard content translated to Brazilian Portuguese ("Painel de Controle")
 - **Enhanced Enrollment System**:
   - **Multiple Class Enrollment**: Students can enroll in multiple classes based on plan limits
   - **Payment Separation**: Payment information stored separately in dedicated payments table
@@ -125,7 +131,7 @@ The system implements strict role-based access control through separate Filament
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd scotelaro-backend
+   cd techbelt-backend
    ```
 
 2. **Start the development environment**
@@ -154,7 +160,7 @@ The system implements strict role-based access control through separate Filament
    ```php
    User::create([
        'name' => 'Admin User',
-       'email' => 'admin@scotelaro.com',
+       'email' => 'admin@techbelt.io',
        'password' => Hash::make('password'),
        'email_verified_at' => now(),
    ])->assignRole('admin');
@@ -177,7 +183,7 @@ After running the database seeder, the following test users are created for deve
 |------|----------------------|----------|------|------------------|---------|
 | João Silva | `+55 (11) 98765-4321` | `password` | Student | `joao.silva@example.com` | **Test onboarding flow** - No subscription, will be redirected to onboarding |
 | Maria Santos | `+55 (21) 99876-5432` | `password` | Student | `maria.santos@example.com` | **Test app access** - Has active subscription, can access app directly |
-| Admin User | `+55 (31) 91234-5678` | `password` | Admin | `admin@scotelaro.com` | **Create resources manually** - Full admin access |
+| Admin User | `+55 (31) 91234-5678` | `password` | Admin | `admin@techbelt.io` | **Create resources manually** - Full admin access |
 | Carlos Oliveira | `+55 (41) 92345-6789` | `password` | Staff | `carlos.oliveira@example.com` | **Test staff role** - Limited access |
 
 ### Additional Users
@@ -233,8 +239,10 @@ The application is fully localized for Brazilian Portuguese (pt_BR) with the fol
 #### Key Translations
 - **Role-based terminology**: "Students" → "Alunos", "Staff" → "Professores"
 - **Financial terms**: "Incoming Payments" → "Pagamentos Recebidos", "Outcomes" → "Saídas"
+- **Dashboard**: "Dashboard" → "Painel de Controle" (custom admin dashboard title)
 - **Navigation labels**: All Filament resources use `getNavigationLabel()` method with `__()` helper
 - **Business context**: Martial arts academy specific terms properly translated
+- **Widget content**: All dashboard widgets (statistics, charts, tables) display Portuguese text
 
 #### Implementation Details
 - **Locale Configuration**: `config/app.php` set to `'locale' => 'pt_BR'`
@@ -282,7 +290,18 @@ app/
 - **Form Validation**: Class count validation based on plan limits
 - **Payment History**: Complete payment tracking within enrollment infolist
 
-#### 5. Database Schema Enhancements
+#### 5. Custom Dashboard Widgets
+- **Dashboard Page**: `app/Filament/Pages/Dashboard.php` - Custom dashboard class extending Filament's base Dashboard
+- **Statistics Overview Widget**: `app/Filament/Widgets/StatsOverviewWidget.php` - 4-card widget showing key business metrics:
+  - Total de Alunos (Total Students)
+  - Receita Mensal (Monthly Revenue)
+  - Lucro Mensal (Monthly Profit)
+  - Matrículas Ativas (Active Enrollments)
+- **Monthly Cash Flow Chart**: `app/Filament/Widgets/MonthlyCashFlowChart.php` - Full-width chart tracking daily income vs expenses with accumulated balance line
+- **Recent Payments Widget**: `app/Filament/Widgets/RecentPaymentsWidget.php` - Table widget showing latest completed payments with Portuguese translations
+- **Portuguese Localization**: Dashboard title translated to "Painel de Controle" in `lang/pt_BR.json`
+
+#### 6. Database Schema Enhancements
 - **Visual Fields Migration**: `database/migrations/2026_02_07_195638_add_visual_fields_to_modalities_table.php`
 - **Commercial Fields Migration**: `database/migrations/2026_02_07_195820_add_commercial_fields_to_pricing_tiers_table.php`
 - **Pivot Table Migration**: `database/migrations/2026_02_07_195902_create_pricing_tier_modality_table.php`
@@ -440,7 +459,7 @@ Key environment variables for development:
 APP_PORT=8080
 VITE_PORT=5173
 DB_HOST=mysql
-DB_DATABASE=scotelaro
+DB_DATABASE=techbelt
 DB_USERNAME=sail
 DB_PASSWORD=password
 ```

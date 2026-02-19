@@ -113,7 +113,7 @@ test('admin panel configuration forces dark mode', function () {
     $providerContent = file_get_contents(app_path('Providers/Filament/AdminPanelProvider.php'));
     
     $this->assertStringContainsString('->darkMode(true)', $providerContent, 'Admin panel should force dark mode');
-    $this->assertStringContainsString("->brandName('Scotelaro Admin')", $providerContent, 'Brand name should be set');
+    $this->assertStringContainsString("->brandName('Tech Belt Admin')", $providerContent, 'Brand name should be set');
 });
 
 test('role-based access control logic works', function () {
