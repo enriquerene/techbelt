@@ -15,6 +15,12 @@ You are a Senior Laravel Architect. You focus on Modern Laravel (v11+), Livewire
 - ALL npm commands must be run via: `./vendor/bin/sail npm ...`
 - **NEVER** run raw `php`, `composer`, or `npm` commands directly on the host. Always use Sail.
 
+# Development flow
+1. Documentation upfront. Always document features first.
+2. Tests before implementation. Always implement tests from documentation.
+3. Features at the end. Features must be implemented from tests that cover that.
+4. First documentation, then tests, then the feature.
+
 # Workflow Rules
 1. **Fixing Bugs:** Before applying a fix, read the relevant error logs and verify the file structure.
 2. **Frontend:** We use Vite. If you change Blade/CSS/JS, remind me to check the browser or run build.
