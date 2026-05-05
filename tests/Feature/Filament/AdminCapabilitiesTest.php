@@ -8,6 +8,7 @@ use App\Models\GymClass;
 use App\Models\PricingTier;
 use App\Models\Expense;
 use App\Models\ResourceItem;
+use Illuminate\Support\Facades\Hash;
 
 test('admin user has correct role permissions', function () {
     $admin = User::factory()->admin()->create();
@@ -65,13 +66,13 @@ test('admin can create other resources in database', function () {
     $this->assertDatabaseHas('pricing_tiers', ['name' => 'Test Pricing Tier']);
 });
 
-test('student resource creation follows business rules', function () {
-    // According to requirements: "admin can create new resource in all resources but not students directly (only via invites)"
-    // This means students should be created via invites, not directly in admin panel
+test('admin can create users directly without invitation', function () {
+    // Business rule: admin should be capable of creating new users directly, not only by invitation
+    // This test verifies the database-level capability exists
     
     $admin = User::factory()->admin()->create();
     
-    // Create a student user directly (this should be possible but business logic says use invites)
+    // Create a student user directly
     $student = User::create([
         'name' => 'Test Student',
         'email' => 'student@test.com',
@@ -82,11 +83,99 @@ test('student resource creation follows business rules', function () {
     
     $this->assertDatabaseHas('users', [
         'email' => 'student@test.com',
-        // Role is stored as JSON array, but we don't need to assert exact format
     ]);
     
-    // The business rule is about the UI/process, not database constraints
-    // Admin CAN create students directly in database, but the UI should guide them to use invites
+    // Create a staff user directly
+    $staff = User::create([
+        'name' => 'Test Staff',
+        'email' => 'staff@test.com',
+        'phone' => '+5511977777777',
+        'password' => bcrypt('password'),
+        'role' => [\App\Models\User::ROLE_STAFF],
+    ]);
+    
+    $this->assertDatabaseHas('users', [
+        'email' => 'staff@test.com',
+    ]);
+    
+    // Create an admin user directly
+    $newAdmin = User::create([
+        'name' => 'Test Admin',
+        'email' => 'newadmin@test.com',
+        'phone' => '+5511966666666',
+        'password' => bcrypt('password'),
+        'role' => [\App\Models\User::ROLE_ADMIN],
+    ]);
+    
+    $this->assertDatabaseHas('users', [
+        'email' => 'newadmin@test.com',
+    ]);
+    
+    // Verify all created users have correct roles
+    $this->assertTrue($student->isStudent());
+    $this->assertTrue($staff->isStaff());
+    $this->assertTrue($newAdmin->isAdmin());
+});
+
+test('admin can create users with multiple roles directly', function () {
+    $admin = User::factory()->admin()->create();
+    
+    // Create a user with both student and staff roles
+    $user = User::create([
+        'name' => 'Multi Role User',
+        'email' => 'multi@test.com',
+        'phone' => '+5511955555555',
+        'password' => bcrypt('password'),
+        'role' => [\App\Models\User::ROLE_STUDENT, \App\Models\User::ROLE_STAFF],
+    ]);
+    
+    $this->assertDatabaseHas('users', [
+        'email' => 'multi@test.com',
+    ]);
+    
+    $this->assertTrue($user->isStudent());
+    $this->assertTrue($user->isStaff());
+});
+
+test('admin can create user with hashed password directly', function () {
+    $admin = User::factory()->admin()->create();
+    
+    $plainPassword = 'my-secret-password-123';
+    
+    $user = User::create([
+        'name' => 'Password Test',
+        'email' => 'password-test@test.com',
+        'phone' => '+5511944444444',
+        'password' => bcrypt($plainPassword),
+        'role' => [\App\Models\User::ROLE_STUDENT],
+    ]);
+    
+    $this->assertDatabaseHas('users', [
+        'email' => 'password-test@test.com',
+    ]);
+    
+    // Verify password is hashed and can be verified
+    $this->assertTrue(Hash::check($plainPassword, $user->password));
+    $this->assertNotEquals($plainPassword, $user->password);
+});
+
+test('admin can create user without email directly', function () {
+    $admin = User::factory()->admin()->create();
+    
+    // Email is optional — phone is the primary identifier
+    $user = User::create([
+        'name' => 'No Email User',
+        'phone' => '+5511933333333',
+        'password' => bcrypt('password'),
+        'role' => [\App\Models\User::ROLE_STUDENT],
+    ]);
+    
+    $this->assertDatabaseHas('users', [
+        'name' => 'No Email User',
+        'phone' => '+5511933333333',
+    ]);
+    
+    $this->assertNull($user->email);
 });
 
 test('resource translations exist in Brazilian Portuguese', function () {

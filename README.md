@@ -20,6 +20,7 @@ A comprehensive martial arts academy management system built with modern Laravel
 | **Admin Panel (Filament v3)** | ✅ Complete | Full CRUD with visual distinctiveness and financial guardrails |
 | **Student PWA (Livewire)** | ✅ Complete | Mobile-friendly student dashboard |
 | **Invite System** | ✅ Complete | Token-based registration with WhatsApp integration |
+| **Direct User Creation** | ✅ Complete | Admin can create users directly without invitation |
 | **Onboarding Wizard** | ✅ Complete | 4-step wizard with automatic redirection and mock payment |
 | **Staff Scopes & Policies** | ✅ Complete | Role-based data filtering with EnrollmentPolicy |
 | **Notification System** | ✅ Complete | Database notifications via Filament |
@@ -47,6 +48,7 @@ The system implements a high-integrity admin experience with strict financial co
 - **Role-Based Access Control** using Filament Shield with granular permissions
 - **Staff Scoped Views** - Instructors only see their students and classes with proper policy enforcement
 - **Invite Management** - Generate and track registration invites with WhatsApp integration
+- **Direct User Creation** - Admins can create users (students, staff, admins) directly without requiring the invitation flow, with password set during creation
 - **Notification System** - Send announcements to students/staff via database notifications
 - **Financial Management** - Complete financial tracking with three dedicated sections:
   - **Incoming Payments Dashboard** - View all student payments, subscriptions, and billing status
@@ -75,7 +77,9 @@ The system implements a high-integrity admin experience with strict financial co
 - **Phone-Based Login** - Phone number is the primary identifier (required)
 - **Optional Email** - Email is optional throughout the system
 - **Two-Factor Authentication** (2FA) support
-- **Invite-Only Registration** for controlled access
+- **Dual Registration Methods**:
+  - **Direct Creation** - Admins create users directly in the admin panel with password set during creation
+  - **Invite-Based** - Token-based registration via WhatsApp for self-service onboarding
 - **Role-Based Permissions** (Admin, Staff, Student) with multi-role support
 - **Password Validation** with Laravel Fortify
 - **Phone Mask** - Automatic formatting for Brazilian phone numbers (+55 (XX) XXXXX-XXXX)
@@ -271,26 +275,33 @@ app/
 - **Model**: `app/Models/Invite.php`
 - **Routes**: `/invite/{token}`
 
-#### 2. Onboarding Wizard
+#### 2. Direct User Creation
+- **Resource**: `app/Filament/Resources/StudentResource.php` — Admin can create users directly via the Filament admin panel
+- **Password Field**: Added to the form, required on create, optional on edit (same pattern as StaffResource)
+- **Role Selection**: Admins can assign any role (student, staff, admin) during creation
+- **Email Verification**: Auto-set to verified when admin creates the user directly
+- **Password Hashing**: Automatic via Laravel's `'password' => 'hashed'` cast on the User model
+
+#### 3. Onboarding Wizard
 - **Component**: `app/Livewire/OnboardingWizard.php`
 - **View**: `resources/views/livewire/onboarding-wizard.blade.php`
 - **Route**: `/onboarding`
 
-#### 3. Staff Scopes & Policies
+#### 4. Staff Scopes & Policies
 - **Enrollment Policy**: `app/Policies/EnrollmentPolicy.php` - Strict "no-edit" strategy with role-based permissions
 - **Student Scopes**: `app/Filament/Resources/StudentResource.php` - Role-based filtering for staff
 - **Visual Resources**: `app/Filament/Resources/ModalityResource.php` - Color, icons, reorderable tables
 - **Commercial Resources**: `app/Filament/Resources/PricingTierResource.php` - Billing periods, frequency types, modality scopes
 - **Financial Guardrails**: `app/Filament/Resources/EnrollmentResource.php` - Read-only views with custom actions (cancel, renew, change payment)
 
-#### 4. Enhanced Enrollment System
+#### 5. Enhanced Enrollment System
 - **Payment Model**: `app/Models/Payment.php` - Dedicated payment tracking with status management
 - **Many-to-Many Relationship**: `enrollment_class` pivot table for multiple class enrollment
 - **Price Calculation**: Automatic default to plan pricing with admin override capability
 - **Form Validation**: Class count validation based on plan limits
 - **Payment History**: Complete payment tracking within enrollment infolist
 
-#### 5. Custom Dashboard Widgets
+#### 6. Custom Dashboard Widgets
 - **Dashboard Page**: `app/Filament/Pages/Dashboard.php` - Custom dashboard class extending Filament's base Dashboard
 - **Statistics Overview Widget**: `app/Filament/Widgets/StatsOverviewWidget.php` - 4-card widget showing key business metrics:
   - Total de Alunos (Total Students)
@@ -301,7 +312,7 @@ app/
 - **Recent Payments Widget**: `app/Filament/Widgets/RecentPaymentsWidget.php` - Table widget showing latest completed payments with Portuguese translations
 - **Portuguese Localization**: Dashboard title translated to "Painel de Controle" in `lang/pt_BR.json`
 
-#### 6. Database Schema Enhancements
+#### 7. Database Schema Enhancements
 - **Visual Fields Migration**: `database/migrations/2026_02_07_195638_add_visual_fields_to_modalities_table.php`
 - **Commercial Fields Migration**: `database/migrations/2026_02_07_195820_add_commercial_fields_to_pricing_tiers_table.php`
 - **Pivot Table Migration**: `database/migrations/2026_02_07_195902_create_pricing_tier_modality_table.php`
@@ -315,17 +326,18 @@ app/
 
 ### For Administrators
 1. Log in at `/admin` with admin credentials
-2. Navigate to **Invites** to create new user invitations
-3. Use **Modalities** with visual distinctiveness (colors, icons, reorderable tables)
-4. Configure **Pricing Tiers** with commercial definitions (billing periods, frequency types, modality scopes)
-5. Manage **Enrollments** with enhanced features:
+2. **Create users directly** via **Alunos** (Students) resource — fill in name, phone, password, and select roles
+3. Alternatively, navigate to **Convites** (Invites) to create user invitations for self-service registration
+4. Use **Modalidades** (Modalities) with visual distinctiveness (colors, icons, reorderable tables)
+5. Configure **Planos** (Pricing Tiers) with commercial definitions (billing periods, frequency types, modality scopes)
+6. Manage **Matrículas** (Enrollments) with enhanced features:
    - Create enrollments with multiple class selection
    - Set custom prices when needed (defaults to plan pricing)
    - View payment history for each enrollment
    - Register new payments directly from enrollment actions
-6. Monitor **Students** with role-based scopes and filtering
-7. Use **Archive** actions for pricing tiers with active subscriptions
-8. Enforce **Financial Contract Immutability** - enrollments cannot be edited once created
+7. Monitor **Alunos** (Students) with role-based scopes and filtering
+8. Use **Archive** actions for pricing tiers with active subscriptions
+9. Enforce **Financial Contract Immutability** - enrollments cannot be edited once created
 
 ### For Staff/Instructors
 1. Log in at `/admin` with staff credentials

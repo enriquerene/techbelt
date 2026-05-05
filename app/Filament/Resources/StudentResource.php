@@ -53,6 +53,13 @@ class StudentResource extends Resource
 
             Forms\Components\Section::make('Configurações da Conta')
                 ->schema([
+                    Forms\Components\TextInput::make('password')
+                        ->password()
+                        ->required(fn (string $context): bool => $context === 'create')
+                        ->minLength(8)
+                        ->dehydrated(fn ($state) => filled($state))
+                        ->revealable()
+                        ->label('Senha'),
                     Forms\Components\CheckboxList::make('role')
                         ->options([
                             'student' => 'Aluno',
@@ -177,7 +184,7 @@ class StudentResource extends Resource
     {
         return [
             'index' => Pages\ListStudents::route('/'),
-            // 'create' => Pages\CreateStudent::route('/create'), // Students should be created via invites, not directly
+            'create' => Pages\CreateStudent::route('/create'),
             'edit' => Pages\EditStudent::route('/{record}/edit'),
         ];
     }
